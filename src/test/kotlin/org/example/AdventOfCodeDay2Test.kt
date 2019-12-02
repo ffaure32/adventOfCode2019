@@ -15,8 +15,38 @@ class AdventOfCodeDay2Test {
 
     }
 
+    @Test
+    fun `part 1`() {
+        val input = loadFromFile("/day2.txt")
+        val instructions = Instructions(input)
+        assertEquals("3716250", calculateFinalState(instructions.inputList()).split(",")[0])
+
+    }
+
+    @Test
+    fun `part 2`() {
+        val input = loadFromFile("/day2.txt")
+        for (noun in 0..99) {
+            for(verb in 0..99) {
+                val instructions = Instructions(input, noun, verb)
+                if("19690720".equals(calculateFinalState(instructions.inputList()).split(",")[0])) {
+                    assertEquals(72, verb)
+                    assertEquals(64, noun)
+                    assertEquals(6472, 100 * noun + verb)
+                    return
+                }
+
+            }
+        }
+
+    }
+
     private fun calculateFinalState(input: String): String {
-        val inputInts = input.split(",").map { it.toInt()}.toMutableList()
+        val toMutableList = stringToIntList(input)
+        return calculateFinalState(toMutableList)
+    }
+
+    private fun calculateFinalState(inputInts: MutableList<Int>): String {
         var instructionPointer = 0
         var instructionSize = 0
         while (instructionSize != 1) {
@@ -43,37 +73,19 @@ class AdventOfCodeDay2Test {
         return 4
     }
 
-
-    @Test
-    fun `part 1`() {
-        val input = loadFromFile("/day2.txt", 12, 2)
-        assertEquals("3716250", calculateFinalState(input).split(",")[0])
-
+    private fun loadFromFile(fileName: String): String {
+        return AdventOfCodeDay2Test::class.java.getResource(fileName).readText()
     }
+}
 
-    @Test
-    fun `part 2`() {
-        for (noun in 0..99) {
-            for(verb in 0..99) {
-                val input = loadFromFile("/day2.txt", noun, verb)
-                if("19690720".equals(calculateFinalState(input).split(",")[0])) {
-                    assertEquals(72, verb)
-                    assertEquals(64, noun)
-                    assertEquals(6472, 100 * noun + verb)
-                }
-
-            }
-        }
-
-    }
-
-    private fun loadFromFile(fileName: String, noun: Int, verb: Int): String {
-        val content = AdventOfCodeDay2Test::class.java.getResource(fileName).readText()
-        val mutableList = content.trim().split(",").map{it.toInt()}.toMutableList()
-        mutableList[1] = noun
-        mutableList[2] = verb
-        return mutableList.joinToString(",")
-
+public data class Instructions(val input : String, val noun : Int = 12, val verb: Int = 2) {
+    public fun inputList(): MutableList<Int> {
+        val inputInts = stringToIntList(input)
+        inputInts[1] = noun
+        inputInts[2] = verb
+        return inputInts
     }
 
 }
+
+public fun stringToIntList(input: String) = input.trim().split(",").map { it.toInt() }.toMutableList()

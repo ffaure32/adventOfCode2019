@@ -26,9 +26,9 @@ class AdventOfCodeDay1Test {
 
     @Test
     fun `samples part 2`() {
-        assertEquals(2, calculateFuelNeededPart2(14))
-        assertEquals(966, calculateFuelNeededPart2(1969))
-        assertEquals(50346, calculateFuelNeededPart2(100756))
+        assertEquals(2, calculateFuelNeededConsideringFuelMass(14))
+        assertEquals(966, calculateFuelNeededConsideringFuelMass(1969))
+        assertEquals(50346, calculateFuelNeededConsideringFuelMass(100756))
     }
 
     @Test
@@ -36,14 +36,11 @@ class AdventOfCodeDay1Test {
         assertEquals(4739374, calculateFuelNeededFromFilePart2("/day1.txt"))
     }
 
-    private fun calculateFuelNeededPart2(moduleMass: Int): Int {
+    private fun calculateFuelNeededConsideringFuelMass(moduleMass: Int): Int {
         var total = 0
-        var subtotal = moduleMass
-        do {
-            subtotal = calculateFuelNeeded(subtotal)
-            total += Math.max(0, subtotal)
-        } while (subtotal > 0)
-        return total
+        val subtotal = Math.max(0, calculateFuelNeeded(moduleMass))
+        total += subtotal
+        return if(subtotal == 0) total else total + calculateFuelNeededConsideringFuelMass(subtotal)
     }
 
     private fun calculateFuelNeededFromFilePart1(fileName: String): Int {
@@ -51,7 +48,7 @@ class AdventOfCodeDay1Test {
     }
 
     private fun calculateFuelNeededFromFilePart2(fileName: String): Int {
-        return calculateFuelNeededFromFile(fileName, ::calculateFuelNeededPart2)
+        return calculateFuelNeededFromFile(fileName, ::calculateFuelNeededConsideringFuelMass)
     }
 
     private fun calculateFuelNeededFromFile(fileName: String, calculateFuelFunction: (Int) -> Int): Int {
