@@ -17,21 +17,21 @@ class AdventOfCodeDay2Test {
 
     private fun calculateFinalState(input: String): String {
         val inputInts = input.split(",").map { it.toInt()}.toMutableList()
-        var index = 0
-        var exit = false
-        while (!exit) {
-            exit = applyToIndex(inputInts, index)
-            index += 4
+        var instructionPointer = 0
+        var instructionSize = 0
+        while (instructionSize != 1) {
+            instructionSize = applyToIndex(inputInts, instructionPointer)
+            instructionPointer += instructionSize
         }
         return inputInts.joinToString(",")
 
 
     }
 
-    private fun applyToIndex(inputInts: MutableList<Int>, index: Int): Boolean {
+    private fun applyToIndex(inputInts: MutableList<Int>, index: Int): Int {
         val opcode = inputInts[index]
         if(opcode == 99) {
-            return true
+            return 1
         }
         val left = inputInts[index + 1]
         val right = inputInts[index + 2]
@@ -40,7 +40,7 @@ class AdventOfCodeDay2Test {
             inputInts[outputPosition] = inputInts[left] + inputInts[right]
         else
             inputInts[outputPosition] = inputInts[left] * inputInts[right]
-        return false
+        return 4
     }
 
 
