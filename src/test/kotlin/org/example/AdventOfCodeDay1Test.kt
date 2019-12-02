@@ -36,10 +36,9 @@ class AdventOfCodeDay1Test {
         assertEquals(4739374, calculateFuelNeededFromFilePart2("/day1.txt"))
     }
 
-    private fun calculateFuelNeededPart2(i: Int): Int {
-
+    private fun calculateFuelNeededPart2(moduleMass: Int): Int {
         var total = 0
-        var subtotal = i
+        var subtotal = moduleMass
         do {
             subtotal = calculateFuelNeeded(subtotal)
             total += Math.max(0, subtotal)
@@ -55,14 +54,9 @@ class AdventOfCodeDay1Test {
         return calculateFuelNeededFromFile(fileName, ::calculateFuelNeededPart2)
     }
 
-    private fun calculateFuelNeededFromFile(fileName: String, function:(Int)->Int): Int {
+    private fun calculateFuelNeededFromFile(fileName: String, calculateFuelFunction: (Int) -> Int): Int {
         val content = AdventOfCodeDay1Test::class.java.getResource(fileName).readText()
-        var total = 0
-        content.lines().forEach {
-            total += function.invoke(it.toInt())
-        }
-        return total
-        // return content.lines().map { it.toInt() }.reduce { tot, it -> tot+function.invoke(it)}
+        return content.lines().map { it.toInt() }.fold(0) { tot, it -> tot + calculateFuelFunction.invoke(it) }
     }
 
     private fun calculateFuelNeeded(mass: Int): Int {
