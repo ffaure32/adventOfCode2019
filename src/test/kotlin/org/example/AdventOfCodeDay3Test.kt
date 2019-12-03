@@ -8,7 +8,17 @@ import kotlin.test.assertEquals
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AdventOfCodeDay3Test {
-    data class Coords(val x: Int, val y: Int)
+    data class Coords(val x: Int, val y: Int) {
+        internal fun move(direction: Char) : Coords {
+            return when (direction) {
+                'R' -> Coords(x + 1, y)
+                'U' -> Coords(x, y + 1)
+                'L' -> Coords(x - 1, y)
+                'D' -> Coords(x, y - 1)
+                else -> throw Exception("unexpected direction")
+            }
+        }
+    }
 
     class Line(var currentPosition: Coords, var path: MutableList<Coords>) {
         private fun move(instruction: String) {
@@ -20,13 +30,7 @@ class AdventOfCodeDay3Test {
         private fun realMove(direction : Char, length: Int) {
             var lastCoords: Coords = currentPosition
             for (i in 0..length) {
-                lastCoords = when (direction) {
-                    'R' ->Coords(lastCoords.x + 1, lastCoords.y)
-                    'U' -> Coords(lastCoords.x, lastCoords.y + 1)
-                    'L' -> Coords(lastCoords.x - 1, lastCoords.y)
-                    'D' -> Coords(lastCoords.x, lastCoords.y - 1)
-                    else -> Coords(0, 0)
-                }
+                lastCoords = lastCoords.move(direction)
                 path.add(lastCoords)
             }
             currentPosition = lastCoords
