@@ -86,13 +86,8 @@ class AdventOfCodeDay3Test {
 
     private fun calculateStepsToFirstIntersection(): Int {
         val intersect = getIntersection()
-        var index = firstLine.path.size
-        intersect.forEach {
-            val newIndex = firstLine.path.indexOf(it)
-            if (newIndex > 0)
-                index = index.coerceAtMost(newIndex)
-        }
-        index += secondLine.path.indexOf(firstLine.path.get(index))
+        var index = intersect.map {firstLine.path.indexOf(it)}.sorted()[1]
+        index += secondLine.path.indexOf(firstLine.path[index])
         return index
     }
 
