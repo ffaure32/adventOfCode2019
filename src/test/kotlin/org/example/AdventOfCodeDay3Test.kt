@@ -2,6 +2,7 @@ package org.example
 
 import org.junit.Test
 import org.junit.jupiter.api.TestInstance
+import kotlin.math.abs
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 
@@ -52,54 +53,54 @@ class AdventOfCodeDay3Test {
     @Test
     fun `first sample part1`() {
         moves = Moves("R8,U5,L5,D3", "U7,R6,D4,L4")
-        assertEquals(6, getManhattanDistance(moves))
+        assertEquals(6, getManhattanDistance())
     }
 
     @Test
     fun `real data part1`() {
         loadFromFile("/day3.txt")
-        assertEquals(529, getManhattanDistance(moves))
+        assertEquals(529, getManhattanDistance())
     }
 
     @Test
     fun `first sample part 2`() {
         moves = Moves("R8,U5,L5,D3", "U7,R6,D4,L4")
-        var index = calculateStepsToFirstIntersection()
+        val index = calculateStepsToFirstIntersection()
         assertEquals(30, index)
     }
 
     @Test
     fun `second sample part 2`() {
         moves = Moves("R75,D30,R83,U83,L12,D49,R71,U7,L72", "U62,R66,U55,R34,D71,R55,D58,R83")
-        var index = calculateStepsToFirstIntersection()
+        val index = calculateStepsToFirstIntersection()
         assertEquals(610, index)
     }
 
     @Test
     fun `real file part 2`() {
         loadFromFile("/day3.txt")
-        var index = calculateStepsToFirstIntersection()
+        val index = calculateStepsToFirstIntersection()
         assertEquals(20386, index)
     }
 
     private fun calculateStepsToFirstIntersection(): Int {
-        val intersect = getIntersection(moves)
+        val intersect = getIntersection()
         var index = firstLine.path.size
         intersect.forEach {
             val newIndex = firstLine.path.indexOf(it)
             if (newIndex > 0)
-                index = Math.min(index, newIndex)
+                index = index.coerceAtMost(newIndex)
         }
         index += secondLine.path.indexOf(firstLine.path.get(index))
         return index
     }
 
-    private fun getManhattanDistance(moves: Moves): Int {
-        val intersection = getIntersection(moves)
-        return (intersection.map { Math.abs(it.x) + Math.abs(it.y) }.sorted()[1])
+    private fun getManhattanDistance(): Int {
+        val intersection = getIntersection()
+        return (intersection.map { abs(it.x) + abs(it.y) }.sorted()[1])
     }
 
-    private fun getIntersection(movesFirstLine: Moves): Set<Coords> {
+    private fun getIntersection(): Set<Coords> {
         firstLine.moves(moves.firstLineMoves)
         secondLine.moves(moves.secondLineMoves)
         return firstLine.path.intersect(secondLine.path)
