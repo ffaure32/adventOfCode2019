@@ -37,17 +37,18 @@ class AdventOfCodeDay3Test {
             line.split(",").forEach { this.move(it) }
         }
     }
+
     data class Moves(val firstLineMoves: String, val secondLineMoves: String)
-    private lateinit var start: Coords
+
+    private val START: Coords = Coords(0, 0)
     private lateinit var firstLine: Line
     private lateinit var secondLine: Line
     lateinit var moves : Moves
 
     @BeforeTest
     fun init() {
-        start = Coords(0, 0)
-        firstLine = Line(start, mutableListOf(start))
-        secondLine = Line(start, mutableListOf(start))
+        firstLine = Line(START, mutableListOf(START))
+        secondLine = Line(START, mutableListOf(START))
     }
 
     @Test
