@@ -30,24 +30,19 @@ class AdventOfCodeDay4Test {
 
     private fun isValid(password: Int): Boolean {
         val stringPassword = password.toString()
-        val set = stringPassword.toSet()
         val list = stringPassword.toList()
         if(list != list.sorted())
             return false
-        if(list.size == set.size)
-            return false
-        return true
+        val set = stringPassword.toSet()
+        return (list.size != set.size)
     }
 
     private fun isValidPart2(password: Int): Boolean {
         val stringPassword = password.toString()
         val list = stringPassword.toList()
-        val valid = stringPassword.asSequence().groupBy { it }.values.filter { it.size == 2 }.any()
         if(list != list.sorted())
             return false
-        if(!valid)
-            return false
-        return true
+        return stringPassword.asSequence().groupBy { it }.values.filter { it.size == 2 }.any()
     }
 
 
