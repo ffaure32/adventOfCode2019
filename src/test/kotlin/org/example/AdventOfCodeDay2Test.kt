@@ -50,38 +50,18 @@ class AdventOfCodeDay2Test {
 
     private fun calculateFinalState(inputInts: MutableList<Int>): MutableList<Int> {
         var instructionPointer = 0
-        var instructionSize = 0
-        while (instructionSize != 1) {
-            instructionSize = applyToIndex(inputInts, instructionPointer)
-            instructionPointer += instructionSize
+        var instructionSize = -1
+        while (instructionSize != 0) {
+            val newInstructionPointer = applyInstructionAtPosition(inputInts, instructionPointer, 0)
+            instructionSize = newInstructionPointer - instructionPointer
+            instructionPointer = newInstructionPointer
         }
         return inputInts
-
-
-    }
-
-    private fun applyToIndex(inputInts: MutableList<Int>, index: Int): Int {
-        val opcode = getOptCode(inputInts[index])
-        if(opcode == OptCode.EXIT) {
-            return opcode.instructionSize
-        }
-        val left = inputInts[index + 1]
-        val right = inputInts[index + 2]
-        val outputPosition = inputInts[index + 3]
-        if (opcode == OptCode.ADD)
-            inputInts[outputPosition] = inputInts[left] + inputInts[right]
-        else
-            inputInts[outputPosition] = inputInts[left] * inputInts[right]
-        return opcode!!.instructionSize
-    }
-
-    private fun String.loadFromFile(): String {
-        return AdventOfCodeDay2Test::class.java.getResource(this).readText()
     }
 }
 
 data class Instructions(val input : String, val noun : Int = 12, val verb: Int = 2) {
-    public fun inputList(): MutableList<Int> {
+    fun inputList(): MutableList<Int> {
         val inputInts = stringToIntList(input)
         inputInts[1] = noun
         inputInts[2] = verb

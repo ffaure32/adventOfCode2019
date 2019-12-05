@@ -29,105 +29,86 @@ fun getOptCode(code: Int): OptCode {
 
 fun applyInstructionAtPosition(inputInts: MutableList<Int>, position: Int, input: Int): Int {
     val instructions = buildInstructions(inputInts[position].toString())
+    val inputList = InputList(inputInts, instructions.parameterModes, position)
     when (instructions.operation) {
         OptCode.ADD -> {
-            val left = getRealValue(inputInts, instructions.parameterModes[0], inputInts[position + 1])
-            val right = getRealValue(inputInts, instructions.parameterModes[1], inputInts[position + 2])
-            val outputPosition = getRealValue(inputInts, instructions.parameterModes[2], position + 3)
+            val left = inputList.getValue(0)
+            val right = inputList.getValue(1)
+            val outputPosition = inputList.getOutputValue(2)
             inputInts[outputPosition] = left + right
         }
         OptCode.MULT -> {
-            val left = getRealValue(inputInts, instructions.parameterModes[0], inputInts[position + 1])
-            val right = getRealValue(inputInts, instructions.parameterModes[1], inputInts[position + 2])
-            val outputPosition = getRealValue(inputInts, instructions.parameterModes[2], position + 3)
+            val left = inputList.getValue(0)
+            val right = inputList.getValue(1)
+            val outputPosition = inputList.getOutputValue(2)
             inputInts[outputPosition] = left * right
         }
         OptCode.STORE -> {
-            val outputPosition = getRealValue(inputInts, instructions.parameterModes[0], position + 1)
+            val outputPosition = inputList.getOutputValue(0)
             inputInts[outputPosition] = input
         }
         OptCode.OUTPUT -> {
-            val outputPosition = getRealValue(inputInts, instructions.parameterModes[0], position + 1)
+            val outputPosition = inputList.getOutputValue(0)
             println(inputInts[outputPosition])
         }
         OptCode.JUMP_IF_TRUE -> {
-            val left = getRealValue(inputInts, instructions.parameterModes[0], inputInts[position + 1])
+            val left = inputList.getValue(0)
             if (left != 0) {
-                return getRealValue(inputInts, instructions.parameterModes[1], inputInts[position + 2])
+                return inputList.getValue(1)
             }
         }
         OptCode.JUMP_IF_FALSE -> {
-            val left = getRealValue(inputInts, instructions.parameterModes[0], inputInts[position + 1])
+            val left = inputList.getValue(0)
             if (left == 0) {
-                return getRealValue(inputInts, instructions.parameterModes[1], inputInts[position + 2])
+                return inputList.getValue(1)
             }
         }
         OptCode.LESS_THAN -> {
-            val left = getRealValue(inputInts, instructions.parameterModes[0], inputInts[position + 1])
-            val right = getRealValue(inputInts, instructions.parameterModes[1], inputInts[position + 2])
-            val outputPosition = getRealValue(inputInts, instructions.parameterModes[2], position + 3)
+            val left = inputList.getValue(0)
+            val right = inputList.getValue(1)
+            val outputPosition = inputList.getOutputValue(2)
             inputInts[outputPosition] = if (left < right) 1 else 0
         }
         OptCode.EQUALS -> {
-            val left = getRealValue(inputInts, instructions.parameterModes[0], inputInts[position + 1])
-            val right = getRealValue(inputInts, instructions.parameterModes[1], inputInts[position + 2])
-            val outputPosition = getRealValue(inputInts, instructions.parameterModes[2], position + 3)
+            val left = inputList.getValue(0)
+            val right = inputList.getValue(1)
+            val outputPosition = inputList.getOutputValue(2)
             inputInts[outputPosition] = if (left == right) 1 else 0
         }
-
+        else -> {}
     }
     return position + instructions.operation.instructionSize
 }
-
-fun getRealValue(inputInts: MutableList<Int>, parameterMode: ParameterMode, indexOrValue: Int): Int {
-    return if (parameterMode == ParameterMode.IMMEDIATE) {
-        indexOrValue
-    } else {
-        inputInts[indexOrValue]
-    }
-
-}
-
 fun buildInstructions(instructionInput: String): Instruction {
     val opcode = if (instructionInput.length > 1) instructionInput.takeLast(2) else instructionInput.takeLast(1)
-    val code = getOptCode(String(opcode.toCharArray()).toInt())
+    val code = getOptCode(opcode.toInt())
     val instruction = instructionInput.padStart(code.instructionSize + 1, '0').toCharArray()
     val parameters = mutableListOf<ParameterMode>()
     for (i in 0..instruction.size - 3) {
         parameters.add(getParameterMode(instruction[instruction.size - 3 - i].toString().toInt()))
     }
     return Instruction(code, parameters)
-
-
 }
 
-fun applyToIndex(inputInts: MutableList<Int>, position: Int, input: Int): Int {
-    val opcode = getOptCode(inputInts[position])
-    when (opcode) {
-        OptCode.ADD -> {
-            val left = inputInts[position + 1]
-            val right = inputInts[position + 2]
-            val outputPosition = inputInts[position + 3]
-            inputInts[outputPosition] = inputInts[left] + inputInts[right]
-        }
-        OptCode.MULT -> {
-            val left = inputInts[position + 1]
-            val right = inputInts[position + 2]
-            val outputPosition = inputInts[position + 3]
-            inputInts[outputPosition] = inputInts[left] * inputInts[right]
-        }
-        OptCode.STORE -> {
-            val outputPosition = inputInts[position + 1]
-            inputInts[outputPosition] = input
-        }
-        OptCode.OUTPUT -> {
-            val value = inputInts[position + 1]
-            // TODO output
-            return inputInts[position + 2]
+class InputList(
+    private val inputInts: MutableList<Int>,
+    private val parameters: List<ParameterMode>,
+    private val position: Int
+) {
+    fun getOutputValue(index: Int): Int {
+        return getRealValue(parameters[index], position + index + 1)
+    }
+
+    fun getValue(index: Int): Int {
+        return getRealValue(parameters[index], inputInts[position + index + 1])
+    }
+
+    private fun getRealValue(parameterMode: ParameterMode, indexOrValue: Int): Int {
+        return if (parameterMode == ParameterMode.IMMEDIATE) {
+            indexOrValue
+        } else {
+            inputInts[indexOrValue]
         }
     }
-    return 0
-
 }
-
 

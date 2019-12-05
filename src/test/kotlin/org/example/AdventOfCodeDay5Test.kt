@@ -2,13 +2,11 @@ package org.example
 
 import org.junit.Test
 import org.junit.jupiter.api.TestInstance
-import kotlin.test.Ignore
 import kotlin.test.assertEquals
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AdventOfCodeDay5Test {
     @Test
-    @Ignore
     fun samples() {
         assertEquals("1002,4,3,4,99", calculateDay5v2("1002,4,3,4,33", 1))
         assertEquals("1101,100,-1,4,99", calculateDay5v2("1101,100,-1,4,0", 1))
@@ -35,8 +33,8 @@ class AdventOfCodeDay5Test {
     }
 
     private fun calculateDay5v2(input: String, inputParam: Int): String {
-        val inputSplit = input.split(",").map { it.toInt() }.toMutableList()
-        org.example.applyInstructionAtPosition(inputSplit, 0, inputParam)
+        val inputSplit = stringToIntList(input)
+        applyInstructionAtPosition(inputSplit, 0, inputParam)
         return inputSplit.joinToString(",")
     }
 
@@ -49,9 +47,5 @@ class AdventOfCodeDay5Test {
             instructionPointer = newInstructionPointer
         }
         return inputInts
-    }
-
-    private fun String.loadFromFile(): String {
-        return AdventOfCodeDay5Test::class.java.getResource(this).readText()
     }
 }

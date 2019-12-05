@@ -20,7 +20,7 @@ class AdventOfCodeDay3Test {
         }
     }
 
-    class Line(var currentPosition: Coords, var path: MutableList<Coords>) {
+    class Line(private var currentPosition: Coords, var path: MutableList<Coords>) {
         private fun move(instruction: String) {
             val direction = instruction.get(0)
             val length = instruction.drop(1).toInt() - 1
@@ -47,7 +47,7 @@ class AdventOfCodeDay3Test {
     private val START: Coords = Coords(0, 0)
     private lateinit var firstLine: Line
     private lateinit var secondLine: Line
-    lateinit var moves : Moves
+    private lateinit var moves : Moves
 
     @BeforeTest
     fun init() {
@@ -63,7 +63,7 @@ class AdventOfCodeDay3Test {
 
     @Test
     fun `real data part1`() {
-        loadFromFile("/day3.txt")
+        loadMovesFromFile()
         assertEquals(529, getManhattanDistance())
     }
 
@@ -83,7 +83,7 @@ class AdventOfCodeDay3Test {
 
     @Test
     fun `real file part 2`() {
-        loadFromFile("/day3.txt")
+        loadMovesFromFile()
         val index = calculateStepsToFirstIntersection()
         assertEquals(20386, index)
     }
@@ -107,8 +107,8 @@ class AdventOfCodeDay3Test {
 
     }
 
-    private fun loadFromFile(fileName : String) {
-        val content = AdventOfCodeDay3Test::class.java.getResource(fileName).readText()
-        moves = Moves(content.lines()[0].trim(),content.lines()[1].trim())
+    private fun loadMovesFromFile() {
+        val content = "/day3.txt".loadFromFile()
+        moves = Moves(content.lines()[0].trim(), content.lines()[1].trim())
     }
 }

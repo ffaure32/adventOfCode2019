@@ -7,7 +7,7 @@ import kotlin.test.assertEquals
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AdventOfCodeDay1Test {
     @Test
-    fun `samples`() {
+    fun samples() {
         assertEquals(2, calculateFuelNeeded(12))
         assertEquals(2, calculateFuelNeeded(14))
         assertEquals(654, calculateFuelNeeded(1969))
