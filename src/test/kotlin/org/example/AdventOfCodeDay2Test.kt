@@ -89,14 +89,4 @@ data class Instructions(val input : String, val noun : Int = 12, val verb: Int =
     }
 }
 
-enum class OptCode(val code:Int, val instructionSize: Int) {
-    ADD(1, 4),
-    MULT(2, 4),
-    EXIT(99, 1)
-}
-
-fun getOptCode(code: Int): OptCode? {
-    return OptCode.values().find {code == it.code}
-}
-
 fun stringToIntList(input: String) = input.trim().split(",").map { it.toInt() }.toMutableList()
