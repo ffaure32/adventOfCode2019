@@ -7,13 +7,9 @@ import kotlin.test.assertEquals
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AdventOfCodeDay6Test {
-    companion object {
-        val ROOT : String = "COM"
-    }
-    private val rootObject = SpaceObject(ROOT, ROOT)
 
     @Test
-    fun samples() {
+    fun testParsing() {
         val input = "B2D)6YV"
         val child = parseSpaceObjects(input)
         assertEquals("B2D", child.parent)
@@ -21,23 +17,17 @@ class AdventOfCodeDay6Test {
     }
 
     @Test
-    fun loadObjects() {
-        val parseFile = parseFile()
-        assertEquals(1606, parseFile.size)
-    }
-
-    @Test
     fun countAllSample() {
         val parseFile = parseSampleFile()
-        val sum = parseFile.map { it.getParentCount(parseFile) }.sum()
-        assertEquals(42, sum)
+        val system = SpaceSystem(parseFile)
+        assertEquals(42, system.countAllParents())
     }
 
     @Test
     fun countAll() {
         val parseFile = parseFile()
-        val sum = parseFile.map { it.getParentCount(parseFile) }.sum()
-        assertEquals(254447, sum)
+        val system = SpaceSystem(parseFile)
+        assertEquals(254447, system.countAllParents())
     }
 
     @Test
@@ -79,12 +69,6 @@ class AdventOfCodeDay6Test {
     }
 
     @Test
-    fun countParents() {
-        val parseFile = parseFile()
-        assertEquals(1606, parseFile.size)
-    }
-
-    @Test
     fun testFindParent() {
         val parseFile = parseFile()
         val system = SpaceSystem(parseFile)
@@ -100,16 +84,16 @@ class AdventOfCodeDay6Test {
         return SpaceObject(objects[1], objects[0])
     }
 
-    private fun parseFile() : Set<SpaceObject> {
+    private fun parseFile() : MutableSet<SpaceObject> {
         val inputFile = "/day6.txt".loadFromFile()
         val input = inputFile.split("\n")
-        return input.map { parseSpaceObjects(it.trim()) }.toSet().plus(rootObject)
+        return input.map { parseSpaceObjects(it.trim()) }.toMutableSet()
     }
 
-    private fun parseSampleFile() : Set<SpaceObject> {
+    private fun parseSampleFile() : MutableSet<SpaceObject> {
         val inputFile = "/day6Sample.txt".loadFromFile()
         val input = inputFile.split("\n")
-        return input.map { parseSpaceObjects(it.trim()) }.toSet().plus(rootObject)
+        return input.map { parseSpaceObjects(it.trim()) }.toMutableSet()
     }
 
 

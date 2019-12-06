@@ -1,17 +1,29 @@
 package org.example
 
-class SpaceSystem(val spaceObjects: Set<SpaceObject>) {
-    public fun calculateTransferCount(firstName: String, secondName: String): Int {
-        val you = findObjectsByName(firstName)
-        val san = findObjectsByName(secondName)
-        val commonParent = findClosestParent(firstName, secondName)
+class SpaceSystem(val spaceObjects: MutableSet<SpaceObject>) {
 
-        return you.listParents(spaceObjects).size + san.listParents(spaceObjects).size - 2 * (commonParent.listParents(
-            spaceObjects
-        ).size + 1)
+    companion object {
+        const val ROOT : String = "COM"
+        val rootObject = SpaceObject(ROOT, ROOT)
     }
 
-    public fun findClosestParent(object1: String, object2: String): SpaceObject {
+    init {
+        spaceObjects.add(rootObject)
+    }
+
+    fun calculateTransferCount(firstName: String, secondName: String): Int {
+        val distanceFromYouToCOM = distanceFromRoot(findObjectsByName(firstName))
+        val distanceFromSanToCOM = distanceFromRoot(findObjectsByName(secondName))
+        val distanceFromCommonParentToCOM = distanceFromRoot(findClosestParent(firstName, secondName))
+
+        return distanceFromYouToCOM + distanceFromSanToCOM - 2 * (distanceFromCommonParentToCOM + 1)
+    }
+
+    private fun distanceFromRoot(spaceObject: SpaceObject): Int {
+        return spaceObject.listParents(spaceObjects).size
+    }
+
+    fun findClosestParent(object1: String, object2: String): SpaceObject {
         val spaceObject1 = findObjectsByName(object1)
         val spaceObject2 = findObjectsByName(object2)
         val parents1 = spaceObject1.listParents(spaceObjects)
@@ -19,14 +31,17 @@ class SpaceSystem(val spaceObjects: Set<SpaceObject>) {
         return parents1.find { parents2.contains(it) }!!
     }
 
-    public fun findObjectsByName(name: String): SpaceObject {
+    fun findObjectsByName(name: String): SpaceObject {
         return spaceObjects.find { it.name == name }!!
     }
 
-    public fun findParent(first: SpaceObject): SpaceObject {
+    fun findParent(first: SpaceObject): SpaceObject {
         return spaceObjects.find { it.name == first.parent }!!
     }
 
+    fun countAllParents() : Int {
+        return spaceObjects.map { it.getParentCount(spaceObjects) }.sum()
+    }
 
 }
 
@@ -69,7 +84,7 @@ data class SpaceObject(val name: String, val parent: String) {
     }
 
     private fun hasParent(): Boolean {
-        return name != AdventOfCodeDay6Test.ROOT
+        return name != SpaceSystem.ROOT
     }
 
 
