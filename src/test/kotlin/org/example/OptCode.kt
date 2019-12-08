@@ -1,5 +1,7 @@
 package org.example
 
+import java.util.*
+
 enum class ParameterMode(val code: Int) {
     POSITION(0),
     IMMEDIATE(1);
@@ -27,7 +29,7 @@ fun getOptCode(code: Int): OptCode {
     return OptCode.values().find { code == it.code }!!
 }
 
-fun applyInstructionAtPosition(inputInts: MutableList<Int>, position: Int, input: Int): Int {
+fun applyInstructionAtPosition(inputInts: MutableList<Int>, position: Int, input: Queue<Int>): Int {
     val instructions = buildInstructions(inputInts[position].toString())
     val inputList = InputList(inputInts, instructions.parameterModes, position)
     when (instructions.operation) {
@@ -45,11 +47,11 @@ fun applyInstructionAtPosition(inputInts: MutableList<Int>, position: Int, input
         }
         OptCode.STORE -> {
             val outputPosition = inputList.getOutputValue(0)
-            inputInts[outputPosition] = input
+            inputInts[outputPosition] = input.remove()!!
         }
         OptCode.OUTPUT -> {
             val outputPosition = inputList.getOutputValue(0)
-            println(inputInts[outputPosition])
+            input.add(inputInts[outputPosition])
         }
         OptCode.JUMP_IF_TRUE -> {
             val left = inputList.getValue(0)
@@ -111,4 +113,11 @@ class InputList(
         }
     }
 }
+
+fun initQueue(vararg input : Int) : Queue<Int> {
+    val queue = LinkedList<Int>()
+    input.forEach { queue.add(it) }
+    return queue
+}
+
 

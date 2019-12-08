@@ -52,7 +52,7 @@ class AdventOfCodeDay2Test {
         var instructionPointer = 0
         var instructionSize = -1
         while (instructionSize != 0) {
-            val newInstructionPointer = applyInstructionAtPosition(inputInts, instructionPointer, 0)
+            val newInstructionPointer = applyInstructionAtPosition(inputInts, instructionPointer, initQueue(0))
             instructionSize = newInstructionPointer - instructionPointer
             instructionPointer = newInstructionPointer
         }
