@@ -70,3 +70,4 @@ data class Instructions(val input : String, val noun : Int = 12, val verb: Int =
 }
 
 fun stringToIntList(input: String) = input.trim().split(",").map { it.toInt() }.toMutableList()
+fun stringToLongList(input: String) = input.trim().split(",").map { it.toLong() }.toMutableList()
