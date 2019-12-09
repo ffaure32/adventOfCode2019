@@ -47,17 +47,31 @@ class IntCodeComputer(val inputs: MutableList<Long>, var position: Int, val inpu
                 inputs[outputPosition] = left * right
             }
             OptCode.STORE -> {
-                val outputPosition = inputList.getOutputValue(0)
-
-                complete(inputs, outputPosition)
-                if(input.isEmpty()) {
-                    inputs[outputPosition] = 0
-                } else {
-                    inputs[outputPosition] = input.remove()!!
+                when(inputList.parameters[0]) {
+                    ParameterMode.POSITION -> {
+                        inputs[inputs[position+1].toInt()]= input.remove()!!
+                    }
+                    ParameterMode.IMMEDIATE -> {
+                        inputs[position+1] = input.remove()!!
+                    }
+                    ParameterMode.RELATIVE -> {
+                        inputs[inputs[position+1].toInt()+relativeBase] = input.remove()!!
+                    }
                 }
             }
             OptCode.OUTPUT -> {
-                val outputPosition = inputList.getOutputValue(0)
+                val outputPosition = when(inputList.parameters[0]) {
+                    ParameterMode.POSITION -> {
+                        inputs[inputs[position+1].toInt()].toInt()
+                    }
+                    ParameterMode.IMMEDIATE -> {
+                        inputs[position+1].toInt()
+                    }
+                    ParameterMode.RELATIVE -> {
+                        inputs[inputs[position+1].toInt()+relativeBase].toInt()
+                    }
+                }
+
                 // input.add(
                 complete(inputs, outputPosition)
                 // inputs[outputPosition])
@@ -95,8 +109,17 @@ class IntCodeComputer(val inputs: MutableList<Long>, var position: Int, val inpu
                 inputs[outputPosition] = if (left == right) 1 else 0
             }
             OptCode.ADJUST_REL_BASE -> {
-                val outputBase = inputList.getOutputValue(0)
-                relativeBase += outputBase
+                when(inputList.parameters[0]) {
+                    ParameterMode.POSITION -> {
+                        relativeBase += inputs[inputs[position+1].toInt()].toInt()
+                    }
+                    ParameterMode.IMMEDIATE -> {
+                        relativeBase += inputs[position+1].toInt()
+                    }
+                    ParameterMode.RELATIVE -> {
+                        relativeBase += inputs[inputs[position+1].toInt()+relativeBase].toInt()
+                    }
+                }
             }
             else -> {
                 return true
@@ -220,7 +243,7 @@ fun initLongQueue(input : Long) : Queue<Long> {
 
 class InputListLong(
     private val inputs: MutableList<Long>,
-    private val parameters: List<ParameterMode>,
+    val parameters: List<ParameterMode>,
     private val position: Int,
     private val relativeBase: Int
 ) {
@@ -238,7 +261,7 @@ class InputListLong(
         } else if (parameterMode == ParameterMode.POSITION) {
             getOrComplete(indexOrValue)
         } else {
-            getOrComplete(indexOrValue)+relativeBase
+            getOrComplete(indexOrValue+relativeBase)
         }
     }
 
