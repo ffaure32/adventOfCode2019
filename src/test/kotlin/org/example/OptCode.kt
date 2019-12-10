@@ -23,105 +23,89 @@ enum class OptCode(val code: Int, val instructionSize: Int) {
 
 data class Instruction(val operation: OptCode, val parameterModes: List<ParameterMode>)
 
-class IntCodeComputer(val inputs: MutableList<Long>, var position: Int, val input: Queue<Long>, var relativeBase: Int) {
-    val output = mutableListOf<Long>()
+enum class Status {
+    WAITING,
+    RUNNING,
+    EXIT
+}
+class IntCodeComputer(val inputs: MutableList<Int>, val input: Queue<Int>) {
+    val output = mutableListOf<Int>()
+    var position = 0
+    var status = Status.RUNNING
+    fun applyInstructionsWithInput() {
+        do {
+            applyInstructionAtPosition()
+        } while (status == Status.RUNNING)
+    }
+
+    fun applyInstructionsWithBlockingInput(vararg newInputs : Int) {
+        newInputs.forEach { input.add(it) }
+        var exit: Boolean
+        do {
+            exit = applyInstructionAtPosition()
+        } while (!exit)
+    }
 
     fun applyInstructionAtPosition() : Boolean {
         val instructions = buildInstructions(inputs[position].toString())
-        val inputList = InputListLong(inputs, instructions.parameterModes, position, relativeBase)
+        val inputList = InputList(inputs, instructions.parameterModes, position)
         when (instructions.operation) {
             OptCode.ADD -> {
+                status = Status.RUNNING
                 val left = inputList.getValue(0)
                 val right = inputList.getValue(1)
                 val outputPosition = inputList.getOutputValue(2)
-
-                complete(inputs, outputPosition)
                 inputs[outputPosition] = left + right
             }
             OptCode.MULT -> {
+                status = Status.RUNNING
                 val left = inputList.getValue(0)
                 val right = inputList.getValue(1)
                 val outputPosition = inputList.getOutputValue(2)
-
-                complete(inputs, outputPosition)
                 inputs[outputPosition] = left * right
             }
             OptCode.STORE -> {
-                when(inputList.parameters[0]) {
-                    ParameterMode.POSITION -> {
-                        inputs[inputs[position+1].toInt()]= input.remove()!!
-                    }
-                    ParameterMode.IMMEDIATE -> {
-                        inputs[position+1] = input.remove()!!
-                    }
-                    ParameterMode.RELATIVE -> {
-                        inputs[inputs[position+1].toInt()+relativeBase] = input.remove()!!
-                    }
-                }
+                status = Status.RUNNING
+                val outputPosition = inputList.getOutputValue(0)
+                inputs[outputPosition] = input.remove()!!
             }
             OptCode.OUTPUT -> {
-                val outputPosition = when(inputList.parameters[0]) {
-                    ParameterMode.POSITION -> {
-                        inputs[inputs[position+1].toInt()].toInt()
-                    }
-                    ParameterMode.IMMEDIATE -> {
-                        inputs[position+1].toInt()
-                    }
-                    ParameterMode.RELATIVE -> {
-                        inputs[inputs[position+1].toInt()+relativeBase].toInt()
-                    }
-                }
-
-                // input.add(
-                complete(inputs, outputPosition)
-                // inputs[outputPosition])
-                // input.add(inputs[outputPosition])
+                val outputPosition = inputList.getOutputValue(0)
                 output.add(inputs[outputPosition])
+                status = Status.WAITING
             }
             OptCode.JUMP_IF_TRUE -> {
+                status = Status.RUNNING
                 val left = inputList.getValue(0)
-                if (left != 0L) {
-                    position = inputList.getValue(1).toInt()
+                if (left != 0) {
+                    position = inputList.getValue(1)
                     return false
                 }
             }
             OptCode.JUMP_IF_FALSE -> {
+                status = Status.RUNNING
                 val left = inputList.getValue(0)
-                if (left == 0L) {
-                    position = inputList.getValue(1).toInt()
+                if (left == 0) {
+                    position = inputList.getValue(1)
                     return false
                 }
             }
             OptCode.LESS_THAN -> {
+                status = Status.RUNNING
                 val left = inputList.getValue(0)
                 val right = inputList.getValue(1)
                 val outputPosition = inputList.getOutputValue(2)
-
-                complete(inputs, outputPosition)
                 inputs[outputPosition] = if (left < right) 1 else 0
             }
             OptCode.EQUALS -> {
+                status = Status.RUNNING
                 val left = inputList.getValue(0)
                 val right = inputList.getValue(1)
                 val outputPosition = inputList.getOutputValue(2)
-
-                complete(inputs, outputPosition)
                 inputs[outputPosition] = if (left == right) 1 else 0
             }
-            OptCode.ADJUST_REL_BASE -> {
-                when(inputList.parameters[0]) {
-                    ParameterMode.POSITION -> {
-                        relativeBase += inputs[inputs[position+1].toInt()].toInt()
-                    }
-                    ParameterMode.IMMEDIATE -> {
-                        relativeBase += inputs[position+1].toInt()
-                    }
-                    ParameterMode.RELATIVE -> {
-                        relativeBase += inputs[inputs[position+1].toInt()+relativeBase].toInt()
-                    }
-                }
-            }
             else -> {
+                status = Status.EXIT
                 return true
             }
         }
@@ -228,57 +212,3 @@ fun initQueue(vararg input : Int) : Queue<Int> {
     input.forEach { queue.add(it) }
     return queue
 }
-
-fun initLongQueue(vararg input : Long) : Queue<Long> {
-    val queue = LinkedList<Long>()
-    input.forEach { queue.add(it) }
-    return queue
-}
-
-fun initLongQueue(input : Long) : Queue<Long> {
-    val queue = LinkedList<Long>()
-    queue.add(input)
-    return queue
-}
-
-class InputListLong(
-    private val inputs: MutableList<Long>,
-    val parameters: List<ParameterMode>,
-    private val position: Int,
-    private val relativeBase: Int
-) {
-    fun getOutputValue(index: Int): Int {
-        return getRealValue(parameters[index], (position + index + 1).toLong()).toInt()
-    }
-
-    fun getValue(index: Int): Long {
-        return getRealValue(parameters[index], inputs[position + index + 1])
-    }
-
-    private fun getRealValue(parameterMode: ParameterMode, indexOrValue: Long): Long {
-        return if (parameterMode == ParameterMode.IMMEDIATE) {
-            indexOrValue
-        } else if (parameterMode == ParameterMode.POSITION) {
-            getOrComplete(indexOrValue)
-        } else {
-            getOrComplete(indexOrValue+relativeBase)
-        }
-    }
-
-    private fun getOrComplete(indexOrValue: Long): Long {
-        complete(inputs, indexOrValue.toInt())
-        return inputs[indexOrValue.toInt()]
-    }
-
-}
-
-
-fun complete(inputs: MutableList<Long>, outputPosition: Int) {
-    val toComplete = outputPosition-inputs.size
-    if(toComplete>=0) {
-        for(i in 0..toComplete) {
-            inputs.add(0L)
-        }
-    }
-}
-

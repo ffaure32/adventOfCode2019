@@ -3,6 +3,7 @@ package org.example
 import org.junit.Test
 import org.junit.jupiter.api.TestInstance
 import java.util.*
+import kotlin.test.Ignore
 import kotlin.test.assertEquals
 
 
@@ -30,33 +31,39 @@ class AdventOfCodeDay7Test {
 
 
     private fun calculateThrustersFromAmplifiersWithFeedbackLoop(input: String): Int {
-        val immutableInput = input.trim().split(",").map { it.toInt() }.toMutableList()
+        val mutableInput = input.trim().split(",").map { it.toInt() }.toMutableList()
         //val permutations = generatePermutationsList(setOf(5, 6, 7, 8, 9))
         val permutations = mutableListOf<List<Int>>()
         permutations.add(listOf(9,8,7,6,5))
         var totalInputs = mutableSetOf<Int>()
 
-        val ampli1 = immutableInput.toMutableList()
-        val ampli2 = immutableInput.toMutableList()
-        val ampli3 = immutableInput.toMutableList()
-        val ampli4 = immutableInput.toMutableList()
-        val ampli5 = immutableInput.toMutableList()
         permutations.forEach {
-            var newOutput = getAmplifierOutput(ampli1, initQueue(it[0], 0))
-            newOutput = getAmplifierOutput(ampli2, initQueue(it[1], newOutput))
-            newOutput = getAmplifierOutput(ampli3, initQueue(it[2], newOutput))
-            newOutput = getAmplifierOutput(ampli4, initQueue(it[3], newOutput))
-            newOutput = getAmplifierOutput(ampli5, initQueue(it[4], newOutput))
-            while(true) {
-                newOutput = getAmplifierOutput(ampli1, initQueue(it[1], newOutput))
-                newOutput = getAmplifierOutput(ampli2, initQueue(it[2], newOutput))
-                newOutput = getAmplifierOutput(ampli3, initQueue(it[3], newOutput))
-                newOutput = getAmplifierOutput(ampli4, initQueue(it[4], newOutput))
-                newOutput = getAmplifierOutput(ampli5, initQueue(it[5], newOutput))
+            val ampli1 = IntCodeComputer(mutableInput, initQueue(it[0], 0))
+            ampli1.applyInstructionsWithBlockingInput()
+            val ampli2 = IntCodeComputer(mutableInput, initQueue(it[1], ampli1.output[0]))
+            ampli2.applyInstructionsWithBlockingInput()
+            val ampli3 = IntCodeComputer(mutableInput, initQueue(it[2], ampli2.output[0]))
+            ampli3.applyInstructionsWithBlockingInput()
+            val ampli4 = IntCodeComputer(mutableInput, initQueue(it[3], ampli3.output[0]))
+            ampli4.applyInstructionsWithBlockingInput()
+            val ampli5 = IntCodeComputer(mutableInput, initQueue(it[4], ampli4.output[0]))
+            ampli5.applyInstructionsWithBlockingInput()
+            var exit : Boolean = false
+            while(!exit) {
+                ampli1.applyInstructionsWithBlockingInput(ampli5.output[0])
+                exit = (ampli1.status == Status.EXIT)
+                ampli2.applyInstructionsWithBlockingInput(ampli1.output[0])
+                exit = (ampli2.status == Status.EXIT)
+                ampli3.applyInstructionsWithBlockingInput(ampli2.output[0])
+                exit = (ampli3.status == Status.EXIT)
+                ampli4.applyInstructionsWithBlockingInput(ampli3.output[0])
+                exit = (ampli4.status == Status.EXIT)
+                ampli5.applyInstructionsWithBlockingInput(ampli4.output[0])
+                exit = (ampli5.status == Status.EXIT)
+
             }
-            totalInputs.add(newOutput)
         }
-        return (totalInputs.sorted().last())
+        return 12
     }
 
     private fun calculateThrustersFromAmplifiers(input: String): Int {
@@ -64,12 +71,17 @@ class AdventOfCodeDay7Test {
         val permutations = generatePermutationsList(setOf(0, 1, 2, 3, 4))
         var totalInputs = mutableSetOf<Int>()
         permutations.forEach {
-            var newOutput = getAmplifierOutput(mutableInput, initQueue(it[0], 0))
-            newOutput = getAmplifierOutput(mutableInput, initQueue(it[1], newOutput))
-            newOutput = getAmplifierOutput(mutableInput, initQueue(it[2], newOutput))
-            newOutput = getAmplifierOutput(mutableInput, initQueue(it[3], newOutput))
-            newOutput = getAmplifierOutput(mutableInput, initQueue(it[4], newOutput))
-            totalInputs.add(newOutput)
+            val ampli1 = IntCodeComputer(mutableInput, initQueue(it[0], 0))
+            ampli1.applyInstructionsWithInput()
+            val ampli2 = IntCodeComputer(mutableInput, initQueue(it[1], ampli1.output[0]))
+            ampli2.applyInstructionsWithInput()
+            val ampli3 = IntCodeComputer(mutableInput, initQueue(it[2], ampli2.output[0]))
+            ampli3.applyInstructionsWithInput()
+            val ampli4 = IntCodeComputer(mutableInput, initQueue(it[3], ampli3.output[0]))
+            ampli4.applyInstructionsWithInput()
+            val ampli5 = IntCodeComputer(mutableInput, initQueue(it[4], ampli4.output[0]))
+            ampli5.applyInstructionsWithInput()
+            totalInputs.add(ampli5.output[0])
         }
         return (totalInputs.sorted().last())
     }
@@ -77,14 +89,6 @@ class AdventOfCodeDay7Test {
     private fun getAmplifierOutput(input : MutableList<Int>, queue : Queue<Int>) : Int {
         applyInstructionsWithInput(input, queue)
         return queue.remove()!!
-    }
-
-    @Test
-    fun realPart2() {
-        val input = "/day5.txt".loadFromFile()
-        val inputSplit = input.trim().split(",").map { it.toInt() }.toMutableList()
-        applyInstructionsWithInput(inputSplit, initQueue(5))
-
     }
 
     private fun applyInstructionsWithInput(inputInts: MutableList<Int>, firstInput: Queue<Int>): MutableList<Int> {
