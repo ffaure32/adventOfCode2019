@@ -2,10 +2,78 @@ package org.example
 
 import java.util.*
 
+enum class Direction {
+    NORTH, WEST, SOUTH, EAST;
+    fun turn(orientation : Int) : Direction {
+        val values = Direction.values()
+        var ordinal: Int
+        // turn left
+        if(orientation == 0) {
+            ordinal = this.ordinal+1
+            if(ordinal == values.size) {
+                ordinal = 0
+            }
+        } else {
+            ordinal = this.ordinal-1
+            if(ordinal < 0) {
+                ordinal = values.size-1
+            }
+        }
+        return values[ordinal]
+    }
+}
+
+class Panel() {
+    val robotPath = mutableMapOf<Position, Int>()
+    private var currentPosition: Position = Position(0,0)
+    private var currentDirection: Direction = Direction.NORTH
+
+    fun executeInstruction(paint : Int, turn : Int) :Int {
+        robotPath.put(currentPosition, paint)
+        currentDirection = currentDirection.turn(turn)
+        currentPosition = forward()
+        return computeOutput()
+    }
+
+    private fun computeOutput(): Int {
+        return robotPath.getOrDefault(currentPosition, 0)
+    }
+
+    private fun forward(): Position {
+        return when(currentDirection) {
+            Direction.NORTH -> Position(currentPosition.x, currentPosition.y+1)
+            Direction.WEST -> Position(currentPosition.x-1, currentPosition.y)
+            Direction.SOUTH -> Position(currentPosition.x, currentPosition.y-1)
+            Direction.EAST -> Position(currentPosition.x+1, currentPosition.y)
+        }
+    }
+
+    fun printMessage() {
+        val minx = robotPath.keys.map{it.x}.min()!!
+        val maxx = robotPath.keys.map{it.x}.max()!!
+        val miny = robotPath.keys.map{it.y}.min()!!
+        val maxy = robotPath.keys.map{it.y}.max()!!
+
+        for(y in maxy downTo miny) {
+            for(x in minx .. maxx) {
+                val paint= robotPath[Position(x, y)]?.or(0)
+                val color = if(paint == 0) '.' else '#'
+                print(color)
+            }
+            println()
+        }
+
+
+
+    }
+}
+data class Position(val x : Int, val y : Int)
+
 class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<Long>) {
     var position: Int = 0
     var relativeBase: Int = 0
     val output = mutableListOf<Long>()
+    val panel = Panel()
 
     fun applyInstructionAtPosition() : Boolean {
         val instructions = buildInstructions(inputs[position].toString())
@@ -39,6 +107,11 @@ class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<Long>) 
             OptCode.OUTPUT -> {
                 val outputPosition = computeOutputPosition(inputList, 0)
                 output.add(inputs[outputPosition])
+                if(output.size == 2) {
+                    val newInput = panel.executeInstruction(output[0].toInt(), output[1].toInt())
+                    input.add(newInput.toLong())
+                    output.clear()
+                }
             }
             OptCode.JUMP_IF_TRUE -> {
                 val left = inputList.getValue(0)
@@ -80,6 +153,7 @@ class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<Long>) 
                 }
             }
             else -> {
+                print(panel.printMessage())
                 return true
             }
         }
