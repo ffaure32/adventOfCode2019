@@ -27,7 +27,7 @@ class AdventOfCodeDay11Test {
 
     @Test
     fun real() {
-        val input = "/day11.txt".loadFromFile()
+        val input = "/day11Max.txt".loadFromFile()
         assertEquals("3100786347", calculateDay9(input, initLongQueue(0)))
 
     }

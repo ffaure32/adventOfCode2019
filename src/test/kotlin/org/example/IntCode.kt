@@ -78,6 +78,7 @@ class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<Long>) 
     fun applyInstructionAtPosition() : Boolean {
         val instructions = buildInstructions(inputs[position].toString())
         val inputList = InputListLong(inputs, instructions.parameterModes, position, relativeBase)
+        println(inputs[position].toString())
         when (instructions.operation) {
             OptCode.ADD -> {
                 val left = inputList.getValue(0)
