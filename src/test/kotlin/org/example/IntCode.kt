@@ -2,6 +2,8 @@ package org.example
 
 import java.util.*
 
+data class LongPosition(val x: Long, val y : Long)
+
 enum class Direction {
     NORTH, WEST, SOUTH, EAST;
     fun turn(orientation : Int) : Direction {
@@ -20,6 +22,16 @@ enum class Direction {
             }
         }
         return values[ordinal]
+    }
+}
+class Screen() {
+    val screenInfo = mutableMapOf<LongPosition, Long>()
+    fun draw(x : Long, y : Long, draw : Long) {
+        screenInfo.put(LongPosition(x, y), draw)
+    }
+
+    fun countTiles(): Int {
+        return screenInfo.size
     }
 }
 
@@ -73,12 +85,12 @@ class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<Long>) 
     var position: Int = 0
     var relativeBase: Int = 0
     val output = mutableListOf<Long>()
-    val panel = Panel()
+    // val panel = Panel()
+    val screen = Screen()
 
     fun applyInstructionAtPosition() : Boolean {
         val instructions = buildInstructions(inputs[position].toString())
         val inputList = InputListLong(inputs, instructions.parameterModes, position, relativeBase)
-        println(inputs[position].toString())
         when (instructions.operation) {
             OptCode.ADD -> {
                 val left = inputList.getValue(0)
@@ -108,10 +120,11 @@ class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<Long>) 
             OptCode.OUTPUT -> {
                 val outputPosition = computeOutputPosition(inputList, 0)
                 output.add(inputs[outputPosition])
-                if(output.size == 2) {
-                    val newInput = panel.executeInstruction(output[0].toInt(), output[1].toInt())
-                    input.add(newInput.toLong())
-                    output.clear()
+                if(output.size == 3) {
+                    //val newInput = panel.executeInstruction(output[0].toInt(), output[1].toInt())
+                    // input.add(newInput.toLong())
+                    //output.clear()
+                    screen.draw(output[0], output[1], output[2])
                 }
             }
             OptCode.JUMP_IF_TRUE -> {
@@ -154,7 +167,7 @@ class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<Long>) 
                 }
             }
             else -> {
-                print(panel.printMessage())
+                print(screen.countTiles())
                 return true
             }
         }
