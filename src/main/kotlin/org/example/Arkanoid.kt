@@ -8,15 +8,19 @@ import javax.swing.JFrame
 
 fun main(args: Array<String>) {
     val input = "/day13part2.txt".loadFromFile()
-    println("SCORE FINAL:"+calculateDay13(input, initLongQueue()))
+    val winnerMoves = "/winnerMoves".loadFromFile()
+    val inputJoystick = winnerMoves.lines()[0].trim().split(",").map { it.toLong() }
+    val longQueue = initLongQueue()
+    longQueue.addAll(inputJoystick)
+    println("SCORE FINAL:" + calculateDay13(input, longQueue))
 }
 
-private fun calculateDay13(input: String, queue : Queue<Long>): Long {
+private fun calculateDay13(input: String, queue: Queue<Long>): Long {
     val inputSplit = stringToLongList(input)
 
     val intCodeComputer = BigIntCodeComputer(inputSplit, queue)
-    var exit = false
-    do {
+   var exit: Boolean
+   do {
         exit = intCodeComputer.applyInstructionAtPosition()
     } while (!exit)
     return intCodeComputer.screen.currentScore

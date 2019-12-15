@@ -6,7 +6,7 @@ data class LongPosition(val x: Long, val y : Long)
 enum class Direction {
     NORTH, WEST, SOUTH, EAST;
     fun turn(orientation : Int) : Direction {
-        val values = Direction.values()
+        val values = values()
         var ordinal: Int
         // turn left
         if(orientation == 0) {
@@ -29,7 +29,7 @@ class Screen() {
     var currentScore = 0L
     fun draw(x : Long, y : Long, draw : Long) {
         if(x == -1L && y == 0L) {
-            currentScore += draw
+            currentScore = draw
         } else {
             screenInfo.put(LongPosition(x, y), draw)
         }
@@ -48,8 +48,8 @@ class Screen() {
                 val toPrint = when(draw) {
                     1L -> '#'
                     2L -> 'B'
-                    3L -> '-'
-                    4L -> 'o'
+                    3L -> '='
+                    4L -> 'O'
                     else -> ' '
                 }
                 print(toPrint)
@@ -105,50 +105,48 @@ class Panel() {
 }
 
 data class Position(val x : Int, val y : Int)
-public class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<Long>) {
+class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<Long>) {
     var position: Int = 0
     var relativeBase: Int = 0
     val output = mutableListOf<Long>()
-    // val panel = Panel()
     val screen = Screen()
+    val successPath = mutableListOf<Long>()
 
     fun applyInstructionAtPosition() : Boolean {
-        val instructions = org.example.buildInstructions(inputs[position].toString())
+
+        val instructions = buildInstructions(inputs[position].toString())
         val inputList = InputListLong(inputs, instructions.parameterModes, position, relativeBase)
         when (instructions.operation) {
-            org.example.OptCode.ADD -> {
+            OptCode.ADD -> {
                 val left = inputList.getValue(0)
                 val right = inputList.getValue(1)
                 val outputPosition = computeOutputPosition(inputList, 2)
                 inputs[outputPosition] = left + right
             }
-            org.example.OptCode.MULT -> {
+            OptCode.MULT -> {
                 val left = inputList.getValue(0)
                 val right = inputList.getValue(1)
                 val outputPosition = computeOutputPosition(inputList, 2)
                 inputs[outputPosition] = left * right
             }
-            org.example.OptCode.STORE -> {
-                screen.printScreen()
-
-                val reader = Scanner(System.`in`)
-                println("enter new command")
-                val userInput = reader.next()!![0]
-                val joystick = if(userInput == 'q') {-1L} else if(userInput == 'd') {1L} else {0L}
-                input.add(joystick)
+            OptCode.STORE -> {
+                if(input.size == 0) {
+                    screen.printScreen()
+                    joystickInteraction()
+                }
                 when(inputList.parameters[0]) {
-                    org.example.ParameterMode.POSITION -> {
+                    ParameterMode.POSITION -> {
                         inputs[inputs[position+1].toInt()]= input.remove()!!
                     }
-                    org.example.ParameterMode.IMMEDIATE -> {
+                    ParameterMode.IMMEDIATE -> {
                         inputs[position+1] = input.remove()!!
                     }
-                    org.example.ParameterMode.RELATIVE -> {
+                    ParameterMode.RELATIVE -> {
                         inputs[inputs[position+1].toInt()+relativeBase] = input.remove()!!
                     }
                 }
             }
-            org.example.OptCode.OUTPUT -> {
+            OptCode.OUTPUT -> {
                 val outputPosition = computeOutputPosition(inputList, 0)
                 output.add(inputs[outputPosition])
                 if(output.size == 3) {
@@ -159,41 +157,41 @@ public class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<
                     output.clear()
                 }
             }
-            org.example.OptCode.JUMP_IF_TRUE -> {
+            OptCode.JUMP_IF_TRUE -> {
                 val left = inputList.getValue(0)
                 if (left != 0L) {
                     position = inputList.getValue(1).toInt()
                     return false
                 }
             }
-            org.example.OptCode.JUMP_IF_FALSE -> {
+            OptCode.JUMP_IF_FALSE -> {
                 val left = inputList.getValue(0)
                 if (left == 0L) {
                     position = inputList.getValue(1).toInt()
                     return false
                 }
             }
-            org.example.OptCode.LESS_THAN -> {
+            OptCode.LESS_THAN -> {
                 val left = inputList.getValue(0)
                 val right = inputList.getValue(1)
                 val outputPosition = computeOutputPosition(inputList, 2)
                 inputs[outputPosition] = if (left < right) 1 else 0
             }
-            org.example.OptCode.EQUALS -> {
+            OptCode.EQUALS -> {
                 val left = inputList.getValue(0)
                 val right = inputList.getValue(1)
                 val outputPosition = computeOutputPosition(inputList, 2)
                 inputs[outputPosition] = if (left == right) 1 else 0
             }
-            org.example.OptCode.ADJUST_REL_BASE -> {
+            OptCode.ADJUST_REL_BASE -> {
                 when(inputList.parameters[0]) {
-                    org.example.ParameterMode.POSITION -> {
+                    ParameterMode.POSITION -> {
                         relativeBase += inputs[inputs[position+1].toInt()].toInt()
                     }
-                    org.example.ParameterMode.IMMEDIATE -> {
+                    ParameterMode.IMMEDIATE -> {
                         relativeBase += inputs[position+1].toInt()
                     }
-                    org.example.ParameterMode.RELATIVE -> {
+                    ParameterMode.RELATIVE -> {
                         relativeBase += inputs[inputs[position+1].toInt()+relativeBase].toInt()
                     }
                 }
@@ -206,12 +204,31 @@ public class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<
         return false
     }
 
+    private fun joystickInteraction() {
+        val reader = Scanner(System.`in`)
+        println("enter new command")
+        val userInput = reader.next()
+        var c = 's'
+        if(userInput != null && userInput.length>0) {
+            c = userInput[0]
+        }
+        val joystick = if (c == 'q') {
+            -1L
+        } else if (c == 'd') {
+            1L
+        } else {
+            0L
+        }
+        input.add(joystick)
+        successPath.add(joystick)
+    }
+
     private fun computeOutputPosition(inputList: InputListLong, index : Int): Int {
         val indexPos = position + index + 1
         val outputPosition = when (inputList.parameters[index]) {
-            org.example.ParameterMode.RELATIVE -> inputs[indexPos].toInt() + relativeBase
-            org.example.ParameterMode.POSITION -> inputs[indexPos].toInt()
-            org.example.ParameterMode.IMMEDIATE -> indexPos
+            ParameterMode.RELATIVE -> inputs[indexPos].toInt() + relativeBase
+            ParameterMode.POSITION -> inputs[indexPos].toInt()
+            ParameterMode.IMMEDIATE -> indexPos
         }
         extendMemory(inputs, outputPosition)
         return outputPosition
@@ -226,7 +243,7 @@ fun initLongQueue(vararg input : Long) : Queue<Long> {
 
 class InputListLong(
     private val inputs: MutableList<Long>,
-    val parameters: List<org.example.ParameterMode>,
+    val parameters: List<ParameterMode>,
     private val position: Int,
     private val relativeBase: Int
 ) {
@@ -234,9 +251,9 @@ class InputListLong(
     fun getValue(index: Int): Long {
         val parameterMode = parameters[index]
         val indexOrValue = inputs[position + index + 1]
-        return if (parameterMode == org.example.ParameterMode.IMMEDIATE) {
+        return if (parameterMode == ParameterMode.IMMEDIATE) {
             indexOrValue
-        } else if (parameterMode == org.example.ParameterMode.POSITION) {
+        } else if (parameterMode == ParameterMode.POSITION) {
             getOrComplete(indexOrValue)
         } else {
             getOrComplete(indexOrValue + relativeBase)
