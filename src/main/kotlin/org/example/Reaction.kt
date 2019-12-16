@@ -10,6 +10,7 @@ data class Chemical(val quantity: Int, val chemicalLitteral: String) {
 class Reactions(private val reactionSet: Set<Reaction>) {
     private val reactionsReducted = mutableSetOf<Reaction>()
     val needs = mutableMapOf<String, Int>()
+    val wastes = mutableMapOf<String, Int>()
     fun computeNeeds(): MutableMap<String, Int> {
         val lastReaction = findReaction("FUEL")
         lastReaction.inputChemicals.forEach { needs.put(it.chemicalLitteral, it.quantity) }
@@ -47,8 +48,9 @@ class Reactions(private val reactionSet: Set<Reaction>) {
         inputChemicalsToTransform.forEach {
             val target = it.value
             val reactionForComponent = findReaction(it.key)
-            val quantityProduced = reactionForComponent.outputChemical.quantity
-            val rate = calculateSimpleNeed(quantityProduced, target)
+            val quantityToProduce = reactionForComponent.outputChemical.quantity
+            val rate = calculateSimpleNeed(quantityToProduce, target)
+            computeWaste(reactionForComponent.outputChemical, rate)
             reactionForComponent.inputChemicals.forEach {
                 computeNeeds(it, rate)
             }
@@ -57,6 +59,17 @@ class Reactions(private val reactionSet: Set<Reaction>) {
         }
     }
 
+    fun computeWaste(chemical: Chemical, rate : Int) {
+        val quantityWasted = chemical.quantity * rate - needs.getOrDefault(chemical.chemicalLitteral, 1)
+        if(quantityWasted>0) {
+            val existingWaste = wastes[chemical.chemicalLitteral]
+            if (existingWaste == null) {
+                wastes[chemical.chemicalLitteral] = quantityWasted
+            } else {
+                wastes[chemical.chemicalLitteral] = quantityWasted + existingWaste
+            }
+        }
+    }
 
     fun computeNeeds(chemical: Chemical, rate: Int) {
         val existingQuantity = needs[chemical.chemicalLitteral]

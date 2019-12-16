@@ -2,7 +2,17 @@ package org.example
 
 import java.util.*
 
-data class LongPosition(val x: Long, val y : Long)
+data class LongPosition(val x: Long, val y : Long) {
+    fun move(direction : Long) : LongPosition {
+        return when(direction) {
+            1L -> LongPosition(x, y+1)
+            2L -> LongPosition(x, y-1)
+            3L -> LongPosition(x-1, y)
+            4L -> LongPosition(x+1, y)
+            else -> LongPosition(x, y)
+        }
+    }
+}
 enum class Direction {
     NORTH, WEST, SOUTH, EAST;
     fun turn(orientation : Int) : Direction {
@@ -21,6 +31,50 @@ enum class Direction {
             }
         }
         return values[ordinal]
+    }
+}
+
+class DroidScreen() {
+    var currentPosition = LongPosition(0,0)
+    val screenInfo = mutableMapOf<LongPosition, Char>(currentPosition to 'D')
+    var movementCommand : Long = 1
+    val oxygenSystem = mutableListOf<LongPosition>()
+    fun printScreen() {
+        val minX : Long = screenInfo.keys.map{it.x}.min()!!
+        val minY = screenInfo.keys.map{ it.y }.min()!!
+        val maxX : Long = screenInfo.keys.map{it.x}.max()!!
+        val maxY = screenInfo.keys.map{ it.y }.max()!!
+        for(y in maxY  downTo minY) {
+            for(x in minX .. maxX) {
+                val draw = screenInfo.getOrDefault(LongPosition(x, y), ' ')
+                print(draw)
+            }
+            println()
+        }
+    }
+
+    fun movementCommand(droidCommand: Long) {
+        movementCommand = droidCommand
+    }
+
+    fun realMove(statusCode: Long) {
+        val target = currentPosition.move(movementCommand)
+        when(statusCode) {
+            1L -> {
+                screenInfo [currentPosition] = '.'
+                currentPosition = target
+                screenInfo [target] = 'D'
+            }
+            2L ->  {
+                screenInfo [currentPosition] = '.'
+                currentPosition = target
+                screenInfo [target] = 'O'
+                oxygenSystem.add(target)
+            }
+            0L ->  {
+                screenInfo [target] = '#'
+            }
+        }
     }
 }
 
@@ -110,7 +164,7 @@ class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<Long>) 
     var relativeBase: Int = 0
     val output = mutableListOf<Long>()
     val screen = Screen()
-    val successPath = mutableListOf<Long>()
+    val droidScreen = DroidScreen()
 
     fun applyInstructionAtPosition() : Boolean {
 
@@ -131,8 +185,7 @@ class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<Long>) 
             }
             OptCode.STORE -> {
                 if(input.size == 0) {
-                    screen.printScreen()
-                    joystickInteraction()
+                    droidInteraction()
                 }
                 when(inputList.parameters[0]) {
                     ParameterMode.POSITION -> {
@@ -148,7 +201,10 @@ class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<Long>) 
             }
             OptCode.OUTPUT -> {
                 val outputPosition = computeOutputPosition(inputList, 0)
-                output.add(inputs[outputPosition])
+                val droidResult = inputs[outputPosition]
+                droidScreen.realMove(droidResult)
+                droidScreen.printScreen()
+
                 if(output.size == 3) {
                     //val newInput = panel.executeInstruction(output[0].toInt(), output[1].toInt())
                     // input.add(newInput.toLong())
@@ -204,7 +260,7 @@ class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<Long>) 
         return false
     }
 
-    private fun joystickInteraction() {
+    private fun droidInteraction() {
         val reader = Scanner(System.`in`)
         println("enter new command")
         val userInput = reader.next()
@@ -212,15 +268,17 @@ class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<Long>) 
         if(userInput != null && userInput.length>0) {
             c = userInput[0]
         }
-        val joystick = if (c == 'q') {
-            -1L
+        val droidCommand = if (c == 'q') {
+            3L
         } else if (c == 'd') {
+            4L
+        } else if (c == 'z') {
             1L
         } else {
-            0L
+            2L
         }
-        input.add(joystick)
-        successPath.add(joystick)
+        input.add(droidCommand)
+        droidScreen.movementCommand(droidCommand)
     }
 
     private fun computeOutputPosition(inputList: InputListLong, index : Int): Int {
