@@ -7,6 +7,7 @@ class DroidScreen() : IntCodeInteraction {
     val screenInfo = mutableMapOf<LongPosition, Char>(currentPosition to 'D')
     var movementCommand : Long = 1
     val oxygenSystem = mutableListOf<LongPosition>()
+
     override fun printScreen() {
         val minX : Long = screenInfo.keys.map{it.x}.min()!!
         val minY = screenInfo.keys.map{ it.y }.min()!!
@@ -33,15 +34,19 @@ class DroidScreen() : IntCodeInteraction {
         val target = currentPosition.move(movementCommand)
         when(statusCode) {
             1L -> {
-                screenInfo [currentPosition] = '.'
+                if(screenInfo [currentPosition] != 'O') screenInfo [currentPosition] = '.'
                 currentPosition = target
-                screenInfo [target] = 'D'
+                if(screenInfo [target] != 'O') screenInfo [target] = 'D'
+                attempt = 0
+                lastMove = movementCommand
             }
             2L ->  {
-                screenInfo [currentPosition] = '.'
+                if(screenInfo [currentPosition] != 'O') screenInfo [currentPosition] = '.'
                 currentPosition = target
                 screenInfo [target] = 'O'
                 oxygenSystem.add(target)
+                attempt = 0
+                lastMove = movementCommand
             }
             0L ->  {
                 screenInfo [target] = '#'
@@ -55,7 +60,24 @@ class DroidScreen() : IntCodeInteraction {
         }
 
     }
+    var lastMove = 1L
+    var attempt = 1
+    val northCommands = listOf<Long>(3, 1, 4, 2)
+    val southCommands = listOf<Long>(4, 2, 3, 1)
+    val eastCommands = listOf<Long>(1, 4, 2, 3)
+    val westCommands = listOf<Long>(2, 3, 1, 4)
+
     private fun droidInteraction(input : Queue<Long>) {
+        println()
+        var droidCommand = when(lastMove) {
+            1L -> northCommands[attempt]
+            2L -> southCommands[attempt]
+            3L -> westCommands[attempt]
+            4L -> eastCommands[attempt]
+            else -> 0
+        }
+        attempt++
+/*
         val reader = Scanner(System.`in`)
         println("enter new command")
         val userInput = reader.next()
@@ -72,6 +94,7 @@ class DroidScreen() : IntCodeInteraction {
         } else {
             2L
         }
+*/
         input.add(droidCommand)
         movementCommand(droidCommand)
     }

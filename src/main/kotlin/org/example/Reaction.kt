@@ -7,7 +7,7 @@ data class Chemical(val quantity: Int, val chemicalLitteral: String) {
 
 }
 
-class Reactions(private val reactionSet: Set<Reaction>) {
+class Reactions(val reactionSet: Set<Reaction>) {
     private val reactionsReducted = mutableSetOf<Reaction>()
     val needs = mutableMapOf<String, Int>()
     val wastes = mutableMapOf<String, Int>()

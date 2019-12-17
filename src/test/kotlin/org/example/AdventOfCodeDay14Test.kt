@@ -149,6 +149,8 @@ class AdventOfCodeDay14Test {
         reactions.computeNeeds()
         val primitiveQuantities = reactions.needs.getOrDefault("ORE",0)
         assertEquals(362713, primitiveQuantities)
+        println(reactions.wastes)
+        println(reactions.reactionSet.filter { it.inputChemicals.map{ it.chemicalLitteral}.contains("ORE") }.map{ it.outputChemical})
     }
 
 }
