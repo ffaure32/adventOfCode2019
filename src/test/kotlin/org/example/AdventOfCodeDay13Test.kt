@@ -11,7 +11,7 @@ class AdventOfCodeDay13Test {
     fun real() {
         val input = "/day13.txt".loadFromFile()
         val longQueue = initLongQueue()
-        assertEquals(363, playArkanoid(input, longQueue).screen.countTiles(2L))
+        assertEquals(363, playArkanoid(input, longQueue).resultPart1() as Int)
     }
 
     @Test
@@ -21,6 +21,6 @@ class AdventOfCodeDay13Test {
         val inputJoystick = winnerMoves.lines()[0].trim().split(",").map { it.toLong() }
         val longQueue = initLongQueue()
         longQueue.addAll(inputJoystick)
-        assertEquals(17159, playArkanoid(input, longQueue).screen.currentScore)
+        assertEquals(17159, playArkanoid(input, longQueue).resultPart2() as Long)
     }
 }

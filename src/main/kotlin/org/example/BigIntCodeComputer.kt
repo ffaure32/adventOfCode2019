@@ -13,158 +13,21 @@ data class LongPosition(val x: Long, val y : Long) {
         }
     }
 }
-enum class Direction {
-    NORTH, WEST, SOUTH, EAST;
-    fun turn(orientation : Int) : Direction {
-        val values = values()
-        var ordinal: Int
-        // turn left
-        if(orientation == 0) {
-            ordinal = this.ordinal+1
-            if(ordinal == values.size) {
-                ordinal = 0
-            }
-        } else {
-            ordinal = this.ordinal-1
-            if(ordinal < 0) {
-                ordinal = values.size-1
-            }
-        }
-        return values[ordinal]
-    }
-}
 
-class DroidScreen() {
-    var currentPosition = LongPosition(0,0)
-    val screenInfo = mutableMapOf<LongPosition, Char>(currentPosition to 'D')
-    var movementCommand : Long = 1
-    val oxygenSystem = mutableListOf<LongPosition>()
-    fun printScreen() {
-        val minX : Long = screenInfo.keys.map{it.x}.min()!!
-        val minY = screenInfo.keys.map{ it.y }.min()!!
-        val maxX : Long = screenInfo.keys.map{it.x}.max()!!
-        val maxY = screenInfo.keys.map{ it.y }.max()!!
-        for(y in maxY  downTo minY) {
-            for(x in minX .. maxX) {
-                val draw = screenInfo.getOrDefault(LongPosition(x, y), ' ')
-                print(draw)
-            }
-            println()
-        }
-    }
-
-    fun movementCommand(droidCommand: Long) {
-        movementCommand = droidCommand
-    }
-
-    fun realMove(statusCode: Long) {
-        val target = currentPosition.move(movementCommand)
-        when(statusCode) {
-            1L -> {
-                screenInfo [currentPosition] = '.'
-                currentPosition = target
-                screenInfo [target] = 'D'
-            }
-            2L ->  {
-                screenInfo [currentPosition] = '.'
-                currentPosition = target
-                screenInfo [target] = 'O'
-                oxygenSystem.add(target)
-            }
-            0L ->  {
-                screenInfo [target] = '#'
-            }
-        }
-    }
-}
-
-class Screen() {
-    val screenInfo = mutableMapOf<LongPosition, Long>()
-    var currentScore = 0L
-    fun draw(x : Long, y : Long, draw : Long) {
-        if(x == -1L && y == 0L) {
-            currentScore = draw
-        } else {
-            screenInfo.put(LongPosition(x, y), draw)
-        }
-    }
-
-    fun countTiles(l: Long): Int {
-        return screenInfo.count{it.value == l}
-    }
-
-    fun printScreen() {
-        val maxX : Long = screenInfo.keys.map{it.x}.max()!!
-        val maxY = screenInfo.keys.map{ it.y }.max()!!
-        for(y in 0..maxY) {
-            for(x in 0..maxX) {
-                val draw = screenInfo.get(LongPosition(x, y))!!
-                val toPrint = when(draw) {
-                    1L -> '#'
-                    2L -> 'B'
-                    3L -> '='
-                    4L -> 'O'
-                    else -> ' '
-                }
-                print(toPrint)
-            }
-            println()
-        }
-    }
-}
-
-class Panel() {
-    val robotPath = mutableMapOf<Position, Int>()
-    private var currentPosition: Position = Position(0, 0)
-    private var currentDirection: Direction = Direction.NORTH
-
-    fun executeInstruction(paint : Int, turn : Int) :Int {
-        robotPath.put(currentPosition, paint)
-        currentDirection = currentDirection.turn(turn)
-        currentPosition = forward()
-        return computeOutput()
-    }
-
-    private fun computeOutput(): Int {
-        return robotPath.getOrDefault(currentPosition, 0)
-    }
-
-    private fun forward(): Position {
-        return when(currentDirection) {
-            Direction.NORTH -> Position(currentPosition.x, currentPosition.y + 1)
-            Direction.WEST -> Position(currentPosition.x - 1, currentPosition.y)
-            Direction.SOUTH -> Position(currentPosition.x, currentPosition.y - 1)
-            Direction.EAST -> Position(currentPosition.x + 1, currentPosition.y)
-        }
-    }
-
-    fun printMessage() {
-        val minx = robotPath.keys.map{it.x}.min()!!
-        val maxx = robotPath.keys.map{it.x}.max()!!
-        val miny = robotPath.keys.map{it.y}.min()!!
-        val maxy = robotPath.keys.map{it.y}.max()!!
-
-        for(y in maxy downTo miny) {
-            for(x in minx .. maxx) {
-                val paint= robotPath[Position(x, y)]?.or(0)
-                val color = if(paint == 0) '.' else '#'
-                print(color)
-            }
-            println()
-        }
-
-
-
+interface IntCodeInteraction {
+    fun specificStore(input : Queue<Long>)
+    fun specificOutput(droidResult: Long)
+    fun printScreen()
+    fun resultPart1(): Any
+    fun resultPart2(): Any {
+        return resultPart1()
     }
 }
 
 data class Position(val x : Int, val y : Int)
-class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<Long>) {
+class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<Long>, val intCodeInteraction : IntCodeInteraction) {
     var position: Int = 0
     var relativeBase: Int = 0
-    val output = mutableListOf<Long>()
-    val screen = Screen()
-    val droidScreen = DroidScreen()
 
     fun applyInstructionAtPosition() : Boolean {
 
@@ -184,9 +47,7 @@ class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<Long>) 
                 inputs[outputPosition] = left * right
             }
             OptCode.STORE -> {
-                if(input.size == 0) {
-                    droidInteraction()
-                }
+                intCodeInteraction.specificStore(input)
                 when(inputList.parameters[0]) {
                     ParameterMode.POSITION -> {
                         inputs[inputs[position+1].toInt()]= input.remove()!!
@@ -201,17 +62,7 @@ class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<Long>) 
             }
             OptCode.OUTPUT -> {
                 val outputPosition = computeOutputPosition(inputList, 0)
-                val droidResult = inputs[outputPosition]
-                droidScreen.realMove(droidResult)
-                droidScreen.printScreen()
-
-                if(output.size == 3) {
-                    //val newInput = panel.executeInstruction(output[0].toInt(), output[1].toInt())
-                    // input.add(newInput.toLong())
-                    //output.clear()
-                    screen.draw(output[0], output[1], output[2])
-                    output.clear()
-                }
+                intCodeInteraction.specificOutput(inputs[outputPosition])
             }
             OptCode.JUMP_IF_TRUE -> {
                 val left = inputList.getValue(0)
@@ -253,32 +104,12 @@ class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<Long>) 
                 }
             }
             else -> {
+                intCodeInteraction.printScreen()
                 return true
             }
         }
         position += instructions.operation.instructionSize
         return false
-    }
-
-    private fun droidInteraction() {
-        val reader = Scanner(System.`in`)
-        println("enter new command")
-        val userInput = reader.next()
-        var c = 's'
-        if(userInput != null && userInput.length>0) {
-            c = userInput[0]
-        }
-        val droidCommand = if (c == 'q') {
-            3L
-        } else if (c == 'd') {
-            4L
-        } else if (c == 'z') {
-            1L
-        } else {
-            2L
-        }
-        input.add(droidCommand)
-        droidScreen.movementCommand(droidCommand)
     }
 
     private fun computeOutputPosition(inputList: InputListLong, index : Int): Int {
@@ -290,6 +121,10 @@ class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<Long>) 
         }
         extendMemory(inputs, outputPosition)
         return outputPosition
+    }
+
+    fun result() : Any {
+        return intCodeInteraction.resultPart1()
     }
 }
 

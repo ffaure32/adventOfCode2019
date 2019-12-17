@@ -11,7 +11,7 @@ fun main(args: Array<String>) {
 public fun findOxygenSystem(input: String, queue: Queue<Long>): BigIntCodeComputer {
     val inputSplit = stringToLongList(input)
 
-    val intCodeComputer = BigIntCodeComputer(inputSplit, queue)
+    val intCodeComputer = BigIntCodeComputer(inputSplit, queue, DroidScreen())
    var exit: Boolean
    do {
         exit = intCodeComputer.applyInstructionAtPosition()

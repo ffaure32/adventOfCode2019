@@ -95,9 +95,4 @@ class AdventOfCodeDay6Test {
         val input = inputFile.split("\n")
         return input.map { parseSpaceObjects(it.trim()) }.toMutableSet()
     }
-
-    @Test
-    fun printCode() {
-        listOf<Int>(67, 65, 80, 85, 83, 32, 68, 69, 77, 65, 73, 78, 32, 63).map { it.toChar() }.forEach { print(it) }
-    }
 }

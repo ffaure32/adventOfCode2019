@@ -17,12 +17,13 @@ class AdventOfCodeDay9Test {
     private fun calculateDay9(input: String, queue : Queue<Long>): String {
         val inputSplit = stringToLongList(input)
 
-        val intCodeComputer = BigIntCodeComputer(inputSplit, queue)
+        val boostInteraction = BoostInteraction()
+        val intCodeComputer = BigIntCodeComputer(inputSplit, queue, boostInteraction)
         var exit = false
         do {
             exit = intCodeComputer.applyInstructionAtPosition()
         } while (!exit)
-        return intCodeComputer.output.map { it.toString()}.joinToString(",")
+        return boostInteraction.resultPart1() as String
     }
 
     @Test
