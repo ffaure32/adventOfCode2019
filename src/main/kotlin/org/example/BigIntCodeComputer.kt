@@ -56,7 +56,9 @@ class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<Long>, 
                         inputs[position+1] = input.remove()!!
                     }
                     ParameterMode.RELATIVE -> {
-                        inputs[inputs[position+1].toInt()+relativeBase] = input.remove()!!
+                        val index = inputs[position + 1].toInt() + relativeBase
+                        extendMemory(inputs, index)
+                        inputs[index] = input.remove()!!
                     }
                 }
             }
