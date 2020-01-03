@@ -11,9 +11,9 @@ class AdventOfCodeDay18Test {
     fun sample() {
         val input = """
 ########################
-#f.D.E.e.C.b.A.@.a.B.c.#
-######################.#
-#d.....................#
+#...............b.C.D.f#
+#.######################
+#.....@.a.B.c.d.A.e.F.g#
 ########################
         """.trimIndent()
         val tritonMaze = buildTritonMaze(input)
@@ -32,6 +32,7 @@ class AdventOfCodeDay18Test {
         val findAccessibleKeys = maze.findAccessibleKeys()
         for (findAccessibleKey in findAccessibleKeys) {
             val shortestPath = maze.findShortestPath(maze.currentPosition, maze.findKeyPosition(findAccessibleKey))
+            println("size:"+findAccessibleKeys.size+" "+ shortestPath)
             if(findAccessibleKeys.size <= 1) {
                 pathes.add(acc+shortestPath)
             }
