@@ -78,11 +78,10 @@ class AdventOfCodeDay18Test {
     }
 
     @Test
-    @Ignore
     fun real() {
         val input = "/day18.txt".loadFromFile()
         val tritonMaze = buildTritonMaze(input)
-        assertEquals(81, shortestPath(tritonMaze))
+        assertEquals(4406, shortestPath(tritonMaze))
     }
     val finalPathes = mutableSetOf<Long>()
     val pathCounts= mutableSetOf<Path>()
@@ -96,16 +95,16 @@ class AdventOfCodeDay18Test {
     fun computeDistance(maze: TritonMaze, path : Path) {
         val findAccessibleKeys = maze.findAccessibleKeys()
         for (findAccessibleKey in findAccessibleKeys) {
-            val newSet = path.chars.toMutableList()
+            val newSet = path.chars.toMutableSet()
             newSet.add(findAccessibleKey)
             val count = path.length
             val shortestPath = maze.findShortestPath(maze.findKeyPosition(findAccessibleKey))
             val totalPath = count + shortestPath
-            val newPath =  Path(newSet, totalPath)
+            val newPath =  Path(newSet, findAccessibleKey, totalPath)
             if(pathExists(newPath)) {
                 return
             }
-            if(totalPath >= 0 && totalPath < finalPathes.min() ?: totalPath+1 && totalPath < count) {
+            if(totalPath >= 0 && totalPath < finalPathes.min() ?: totalPath+1) {
                 pathCounts.add(newPath)
                 if (findAccessibleKeys.size <= 1) {
                     finalPathes.add(totalPath)
@@ -121,9 +120,9 @@ class AdventOfCodeDay18Test {
     }
 
     fun pathExists(path : Path) : Boolean {
-        return pathCounts.find { it.chars.toSet() == path.chars.toSet() && it.chars.last() == path.chars.last() && it.length <= path.length } != null
+        return pathCounts.find { it.lastChar == path.lastChar && it.length <= path.length && it.chars== path.chars } != null
     }
-    class Path(val chars : MutableList<Char> = mutableListOf(), var length : Long = 0L) {
+    class Path(val chars : Set<Char> = setOf(), val lastChar : Char = 'a', val length : Long = 0L) {
 
     }
 }
