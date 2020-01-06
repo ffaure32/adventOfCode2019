@@ -31,6 +31,7 @@ public class TritonMaze constructor (val maze: Map<Position, Char>) {
 
     fun findAccessibleKeys(): Set<Char> {
         return maze.entries.filter{ it.value.isLowerCase() }.map { it.value }.toSet()
+        // return findAccessiblePositions().map { maze[it]!! }.filter{ it.isLowerCase() }.toSet()
     }
     fun findKeyPosition(c : Char): Position {
         return maze.entries.find { it.value == c }!!.key
@@ -73,14 +74,16 @@ public class TritonMaze constructor (val maze: Map<Position, Char>) {
         val position = findKeyPosition(char)
         newMaze[findKeyPosition('@')] = '.'
         newMaze[position] = '@'
-        newMaze[findKeyPosition(char.toUpperCase())] = '.'
+        if(hasDoor(char)) {
+            newMaze[findKeyPosition(char.toUpperCase())] = '.'
+        }
         return TritonMaze(newMaze)
     }
 
-    fun findShortestPath(src : Position, dest : Position): Int {
+    fun findShortestPath(dest: Position): Int {
         val visited = mutableMapOf<Position, Boolean>()
         val q = LinkedList<QueueNode>()
-        val s = QueueNode(src, 0)
+        val s = QueueNode(currentPosition, 0)
         q.add(s)
 
         while(q.isNotEmpty()) {
