@@ -1,7 +1,5 @@
 package org.example
 
-import java.util.*
-
 fun buildTritonMaze(input: String): TritonMaze {
     val maze = mutableMapOf<Position, Char>()
     var y = 0
@@ -16,17 +14,16 @@ fun buildTritonMaze(input: String): TritonMaze {
     return TritonMaze(maze)
 }
 
-public class TritonMaze constructor (val maze: Map<Position, Char>) {
+class TritonMaze constructor (maze: Map<Position, Char>) : Maze(maze, '@') {
 
 
     val keys = mutableMapOf<Char, Position>()
     val doors = mutableMapOf<Char, Position>()
-    var currentPosition: Position
 
     init {
         keys.putAll(maze.entries.filter { it.value.isLowerCase() }.associate { (k,v)-> v to k })
         doors.putAll(maze.entries.filter { it.value.isUpperCase() }.associate { (k,v)-> v to k })
-        currentPosition = maze.filter { it.value == '@' }.keys.first()!!
+        currentPosition = maze.filter { it.value == currentPositionChar }.keys.first()!!
     }
 
     fun findAccessibleKeys(): Set<Char> {
@@ -44,58 +41,16 @@ public class TritonMaze constructor (val maze: Map<Position, Char>) {
     fun openDoor(char : Char) : TritonMaze {
         val newMaze = maze.toMutableMap()
         val position = findKeyPosition(char)
-        newMaze[findKeyPosition('@')] = '.'
-        newMaze[position] = '@'
+        newMaze[findKeyPosition(currentPositionChar)] = freePathChar
+        newMaze[position] = currentPositionChar
         if(hasDoor(char)) {
-            newMaze[findKeyPosition(char.toUpperCase())] = '.'
+            newMaze[findKeyPosition(char.toUpperCase())] = freePathChar
         }
         return TritonMaze(newMaze)
     }
 
-    fun findShortestPath(dest: Position): Int {
-        val visited = mutableMapOf<Position, Boolean>()
-        val q = LinkedList<QueueNode>()
-        val s = QueueNode(currentPosition, 0)
-        q.add(s)
-
-        while(q.isNotEmpty()) {
-            val curr = q.peek()
-            val pos = curr.position
-            if(pos == dest) {
-                return curr.distance
-            }
-
-            q.remove()
-            for (neighbour in getNeighbours(pos)) {
-                if(maze[neighbour] != null) {
-                    if ((maze[neighbour] == '.' || maze[neighbour]!!.isLowerCase())
-                        && visited[neighbour] == null
-                    ) {
-                        visited[neighbour] = true
-                        q.add(QueueNode(neighbour, curr.distance + 1))
-                    }
-                }
-            }
-        }
-        return -1
+    override fun isFreePath(char : Char?): Boolean {
+        return super.isFreePath(char) || char != null && char.isLowerCase()
     }
-
-    override fun toString(): String {
-        val builder = StringBuilder()
-        val maxx = maze.map { it.key.x }.max()!!
-        val maxy = maze.map { it.key.y }.max()!!
-        for(y in 0 until maxy) {
-            for(x in 0 until maxx) {
-                builder.append(maze[Position(x, y)])
-            }
-            builder.append('\n')
-        }
-        return builder.toString()
-    }
-
-
-
 }
-
-data class QueueNode(val position : Position, val distance : Int)
 

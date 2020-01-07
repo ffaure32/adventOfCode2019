@@ -3,23 +3,15 @@ package org.example
 import java.util.*
 
 class DroidScreen() : IntCodeInteraction {
+    val currentPositionChar = 'D'
     var currentPosition = Position(0, 0)
-    val screenInfo = mutableMapOf<Position, Char>(currentPosition to 'D')
+    val screenInfo = mutableMapOf<Position, Char>(currentPosition to currentPositionChar)
+    val maze = Maze(screenInfo, currentPositionChar)
     var movementCommand : Int = 1
     val oxygenSystem = mutableListOf<Position>()
 
     override fun printScreen() {
-        val minX : Int = screenInfo.keys.map{it.x}.min()!!
-        val minY = screenInfo.keys.map{ it.y }.min()!!
-        val maxX : Int = screenInfo.keys.map{it.x}.max()!!
-        val maxY = screenInfo.keys.map{ it.y }.max()!!
-        for(y in maxY  downTo minY) {
-            for(x in minX .. maxX) {
-                val draw = screenInfo.getOrDefault(Position(x, y), ' ')
-                print(draw)
-            }
-            println()
-        }
+        println(maze.toString())
     }
 
     override fun resultPart1(): Any {
@@ -68,7 +60,6 @@ class DroidScreen() : IntCodeInteraction {
     val westCommands = listOf<Int>(2, 3, 1, 4)
 
     private fun droidInteraction(input : Queue<Long>) {
-        println()
         val droidCommand = when(lastMove) {
             1 -> northCommands[attempt]
             2 -> southCommands[attempt]
@@ -83,6 +74,6 @@ class DroidScreen() : IntCodeInteraction {
 
     override fun specificOutput(droidResult: Long) {
         realMove(droidResult.toInt())
-        printScreen()
+        //printScreen()
     }
 }

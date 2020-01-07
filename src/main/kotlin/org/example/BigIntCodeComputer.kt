@@ -45,6 +45,58 @@ fun getNeighbours(position: Position): Set<Position> {
     return neighbours
 }
 
+open class Maze constructor (val maze: Map<Position, Char>, val currentPositionChar : Char) {
+    val freePathChar = '.'
+    var currentPosition: Position = maze.filter { it.value == currentPositionChar }.keys.first()
+
+    fun findShortestPath(dest: Position): Int {
+        val visited = mutableMapOf<Position, Boolean>()
+        val q = LinkedList<QueueNode>()
+        val s = QueueNode(currentPosition, 0)
+        q.add(s)
+
+        while(q.isNotEmpty()) {
+            val curr = q.peek()
+            val pos = curr.position
+            if(pos == dest) {
+                return curr.distance
+            }
+
+            q.remove()
+            for (neighbour in getNeighbours(pos)) {
+                if (isFreePath(maze[neighbour]) && visited[neighbour] == null) {
+                    visited[neighbour] = true
+                    q.add(QueueNode(neighbour, curr.distance + 1))
+                }
+            }
+        }
+        return -1
+    }
+    open fun isFreePath(char : Char?) : Boolean {
+        return char != null && char == freePathChar
+    }
+
+    override fun toString(): String {
+        val builder = StringBuilder()
+        val minx = maze.map { it.key.x }.min()!!
+        val miny = maze.map { it.key.y }.min()!!
+        val maxx = maze.map { it.key.x }.max()!!
+        val maxy = maze.map { it.key.y }.max()!!
+        for(y in miny .. maxy) {
+            for(x in minx .. maxx) {
+                builder.append(maze[Position(x, y)]?:'E')
+            }
+            builder.append('\n')
+        }
+        return builder.toString()
+    }
+
+
+
+
+}
+
+data class QueueNode(val position : Position, val distance : Int)
 
 class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<Long>, val intCodeInteraction : IntCodeInteraction) {
     var position: Int = 0
