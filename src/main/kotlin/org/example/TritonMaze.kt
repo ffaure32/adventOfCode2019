@@ -36,40 +36,12 @@ public class TritonMaze constructor (val maze: Map<Position, Char>) {
     fun findKeyPosition(c : Char): Position {
         return maze.entries.find { it.value == c }!!.key
     }
-    fun findAccessiblePositions(): Set<Position> {
-        val alreadyVisited = mutableSetOf<Position>()
-        return accessiblePositions(currentPosition, alreadyVisited)
-    }
 
     fun hasDoor(findAccessibleKey: Char): Boolean {
         return maze.values.contains(findAccessibleKey.toUpperCase())
     }
 
-    fun accessiblePositions(position: Position, alreadyVisited: MutableSet<Position>): MutableSet<Position> {
-        val result = mutableSetOf<Position>()
-        val neighbours = getNeighbours(position).minus(alreadyVisited)
-        alreadyVisited.addAll(neighbours)
-        val currentFilter = neighbours.filter {
-            val char = maze.getOrDefault(it, '#')
-            char.isLowerCase() || char == '.'
-        }.toSet()
-        result.addAll(currentFilter)
-        currentFilter.forEach {
-            result.addAll(accessiblePositions(it, alreadyVisited))
-        }
-        return result
-    }
-
-    private fun getNeighbours(position: Position): Set<Position> {
-        val neighbours = mutableSetOf<Position>()
-        neighbours.add(Position(position.x, position.y + 1))
-        neighbours.add(Position(position.x, position.y - 1))
-        neighbours.add(Position(position.x + 1, position.y))
-        neighbours.add(Position(position.x - 1, position.y))
-        return neighbours
-    }
-
-    public fun openDoor(char : Char) : TritonMaze {
+    fun openDoor(char : Char) : TritonMaze {
         val newMaze = maze.toMutableMap()
         val position = findKeyPosition(char)
         newMaze[findKeyPosition('@')] = '.'

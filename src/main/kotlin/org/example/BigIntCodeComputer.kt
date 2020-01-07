@@ -24,7 +24,28 @@ interface IntCodeInteraction {
     }
 }
 
-data class Position(val x : Int, val y : Int)
+data class Position(val x : Int, val y : Int) {
+    fun move(direction : Int) : Position {
+        return when(direction) {
+            1 -> Position(x, y+1)
+            2 -> Position(x, y-1)
+            3 -> Position(x-1, y)
+            4 -> Position(x+1, y)
+            else -> Position(x, y)
+        }
+    }
+}
+
+fun getNeighbours(position: Position): Set<Position> {
+    val neighbours = mutableSetOf<Position>()
+    neighbours.add(Position(position.x, position.y + 1))
+    neighbours.add(Position(position.x, position.y - 1))
+    neighbours.add(Position(position.x + 1, position.y))
+    neighbours.add(Position(position.x - 1, position.y))
+    return neighbours
+}
+
+
 class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<Long>, val intCodeInteraction : IntCodeInteraction) {
     var position: Int = 0
     var relativeBase: Int = 0

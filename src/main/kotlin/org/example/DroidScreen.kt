@@ -3,19 +3,19 @@ package org.example
 import java.util.*
 
 class DroidScreen() : IntCodeInteraction {
-    var currentPosition = LongPosition(0, 0)
-    val screenInfo = mutableMapOf<LongPosition, Char>(currentPosition to 'D')
-    var movementCommand : Long = 1
-    val oxygenSystem = mutableListOf<LongPosition>()
+    var currentPosition = Position(0, 0)
+    val screenInfo = mutableMapOf<Position, Char>(currentPosition to 'D')
+    var movementCommand : Int = 1
+    val oxygenSystem = mutableListOf<Position>()
 
     override fun printScreen() {
-        val minX : Long = screenInfo.keys.map{it.x}.min()!!
+        val minX : Int = screenInfo.keys.map{it.x}.min()!!
         val minY = screenInfo.keys.map{ it.y }.min()!!
-        val maxX : Long = screenInfo.keys.map{it.x}.max()!!
+        val maxX : Int = screenInfo.keys.map{it.x}.max()!!
         val maxY = screenInfo.keys.map{ it.y }.max()!!
         for(y in maxY  downTo minY) {
             for(x in minX .. maxX) {
-                val draw = screenInfo.getOrDefault(LongPosition(x, y), ' ')
+                val draw = screenInfo.getOrDefault(Position(x, y), ' ')
                 print(draw)
             }
             println()
@@ -26,21 +26,21 @@ class DroidScreen() : IntCodeInteraction {
         return "c'est fini"
     }
 
-    fun movementCommand(droidCommand: Long) {
+    fun movementCommand(droidCommand: Int) {
         movementCommand = droidCommand
     }
 
-    fun realMove(statusCode: Long) {
+    fun realMove(statusCode: Int) {
         val target = currentPosition.move(movementCommand)
         when(statusCode) {
-            1L -> {
+            1 -> {
                 if(screenInfo [currentPosition] != 'O') screenInfo [currentPosition] = '.'
                 currentPosition = target
                 if(screenInfo [target] != 'O') screenInfo [target] = 'D'
                 attempt = 0
                 lastMove = movementCommand
             }
-            2L ->  {
+            2 ->  {
                 if(screenInfo [currentPosition] != 'O') screenInfo [currentPosition] = '.'
                 currentPosition = target
                 screenInfo [target] = 'O'
@@ -48,7 +48,7 @@ class DroidScreen() : IntCodeInteraction {
                 attempt = 0
                 lastMove = movementCommand
             }
-            0L ->  {
+            0 ->  {
                 screenInfo [target] = '#'
             }
         }
@@ -60,47 +60,29 @@ class DroidScreen() : IntCodeInteraction {
         }
 
     }
-    var lastMove = 1L
+    var lastMove = 1
     var attempt = 1
-    val northCommands = listOf<Long>(3, 1, 4, 2)
-    val southCommands = listOf<Long>(4, 2, 3, 1)
-    val eastCommands = listOf<Long>(1, 4, 2, 3)
-    val westCommands = listOf<Long>(2, 3, 1, 4)
+    val northCommands = listOf<Int>(3, 1, 4, 2)
+    val southCommands = listOf<Int>(4, 2, 3, 1)
+    val eastCommands = listOf<Int>(1, 4, 2, 3)
+    val westCommands = listOf<Int>(2, 3, 1, 4)
 
     private fun droidInteraction(input : Queue<Long>) {
         println()
-        var droidCommand = when(lastMove) {
-            1L -> northCommands[attempt]
-            2L -> southCommands[attempt]
-            3L -> westCommands[attempt]
-            4L -> eastCommands[attempt]
+        val droidCommand = when(lastMove) {
+            1 -> northCommands[attempt]
+            2 -> southCommands[attempt]
+            3 -> westCommands[attempt]
+            4 -> eastCommands[attempt]
             else -> 0
         }
         attempt++
-/*
-        val reader = Scanner(System.`in`)
-        println("enter new command")
-        val userInput = reader.next()
-        var c = 's'
-        if(userInput != null && userInput.isNotEmpty()) {
-            c = userInput[0]
-        }
-        val droidCommand = if (c == 'q') {
-            3L
-        } else if (c == 'd') {
-            4L
-        } else if (c == 'z') {
-            1L
-        } else {
-            2L
-        }
-*/
-        input.add(droidCommand)
+        input.add(droidCommand.toLong())
         movementCommand(droidCommand)
     }
 
     override fun specificOutput(droidResult: Long) {
-        realMove(droidResult)
+        realMove(droidResult.toInt())
         printScreen()
     }
 }
