@@ -74,6 +74,9 @@ class DroidScreen() : IntCodeInteraction {
 
     override fun specificOutput(droidResult: Long) {
         realMove(droidResult.toInt())
-        //printScreen()
+    }
+
+    fun isMazeComplete(): Boolean {
+        return maze.isComplete()
     }
 }

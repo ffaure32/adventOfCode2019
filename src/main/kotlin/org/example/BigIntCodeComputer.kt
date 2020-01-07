@@ -91,7 +91,18 @@ open class Maze constructor (val maze: Map<Position, Char>, val currentPositionC
         return builder.toString()
     }
 
-
+    fun isComplete(): Boolean {
+        if(maze.size <= 4)
+            return false
+        val minx = maze.map { it.key.x }.min()!!
+        val miny = maze.map { it.key.y }.min()!!
+        val maxx = maze.map { it.key.x }.max()!!
+        val maxy = maze.map { it.key.y }.max()!!
+        return maze.filter { it.key.x == minx }.none{ isFreePath(it.value) || it.value == currentPositionChar }
+            && maze.filter { it.key.y == miny }.none{ isFreePath(it.value) || it.value == currentPositionChar  }
+            && maze.filter { it.key.x == maxx }.none{ isFreePath(it.value) || it.value == currentPositionChar  }
+            && maze.filter { it.key.y == maxy }.none{ isFreePath(it.value) || it.value == currentPositionChar  }
+    }
 
 
 }

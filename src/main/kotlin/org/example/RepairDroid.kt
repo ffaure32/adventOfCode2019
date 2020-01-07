@@ -17,7 +17,7 @@ fun findOxygenSystem(input: String, queue: Queue<Long>): BigIntCodeComputer {
     val intCodeComputer = BigIntCodeComputer(inputSplit, queue, droidScreen)
    var exit: Boolean
     do {
-        exit = intCodeComputer.applyInstructionAtPosition()
+        exit = intCodeComputer.applyInstructionAtPosition() || droidScreen.isMazeComplete()
     } while (!exit)
     return intCodeComputer
 }
