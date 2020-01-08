@@ -82,4 +82,16 @@ class DroidScreen() : IntCodeInteraction {
     fun isMazeComplete(): Boolean {
         return maze.isComplete()
     }
+
+    fun findPathToExit(): Int {
+        val newMaze = maze.maze.toMutableMap()
+        val previousPosition = newMaze.filter { it.value == currentPositionChar }.map { it.key }.first()!!
+        newMaze[previousPosition] = maze.freePathChar
+        newMaze[Position(0,0)] = currentPositionChar
+        val whereIam = Maze(newMaze, currentPositionChar)
+        println(whereIam)
+
+        return whereIam.findShortestPath(oxygenSystem)
+
+    }
 }

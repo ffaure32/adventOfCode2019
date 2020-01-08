@@ -62,11 +62,11 @@ open class Maze constructor (val maze: MutableMap<Position, Char>, val currentPo
             if(pos == dest) {
                 return curr.distance
             }
-
             q.remove()
             for (neighbour in getNeighbours(pos)) {
-                if (isFreePath(maze[neighbour]) && visited[neighbour] == null) {
+                if ((maze[neighbour] == 'O' || isFreePath(maze[neighbour])) && visited[neighbour] == null) {
                     visited[neighbour] = true
+                    maze[neighbour] = 'V'
                     q.add(QueueNode(neighbour, curr.distance + 1))
                 }
             }

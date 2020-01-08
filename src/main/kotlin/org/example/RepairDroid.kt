@@ -19,6 +19,5 @@ fun findOxygenSystem(input: String, queue: Queue<Long>): Int {
     do {
         exit = intCodeComputer.applyInstructionAtPosition() || droidScreen.isMazeComplete()
     } while (!exit)
-    droidScreen.maze.currentPosition = Position(0,0)
-    return droidScreen.maze.findShortestPath(droidScreen.oxygenSystem)
+    return droidScreen.findPathToExit()
 }
