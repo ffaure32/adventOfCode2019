@@ -45,8 +45,9 @@ fun getNeighbours(position: Position): Set<Position> {
     return neighbours
 }
 
-open class Maze constructor (val maze: Map<Position, Char>, val currentPositionChar : Char) {
+open class Maze constructor (val maze: MutableMap<Position, Char>, val currentPositionChar : Char) {
     val freePathChar = '.'
+    val wallChar = '#'
     var currentPosition: Position = maze.filter { it.value == currentPositionChar }.keys.first()
 
     fun findShortestPath(dest: Position): Int {
@@ -73,7 +74,22 @@ open class Maze constructor (val maze: Map<Position, Char>, val currentPositionC
         return -1
     }
     open fun isFreePath(char : Char?) : Boolean {
-        return char != null && char == freePathChar
+        return char != null && (char == freePathChar || char == 'E')
+    }
+
+    fun fillEmptyParts() {
+        val minx = maze.map { it.key.x }.min()!!
+        val miny = maze.map { it.key.y }.min()!!
+        val maxx = maze.map { it.key.x }.max()!!
+        val maxy = maze.map { it.key.y }.max()!!
+        for(y in miny .. maxy) {
+            for(x in minx .. maxx) {
+                val target = Position(x, y)
+                if(!maze.containsKey(target)) {
+                    maze[target] = 'E'
+                }
+            }
+        }
     }
 
     override fun toString(): String {
@@ -82,9 +98,9 @@ open class Maze constructor (val maze: Map<Position, Char>, val currentPositionC
         val miny = maze.map { it.key.y }.min()!!
         val maxx = maze.map { it.key.x }.max()!!
         val maxy = maze.map { it.key.y }.max()!!
-        for(y in miny .. maxy) {
+        for(y in maxy downTo miny) {
             for(x in minx .. maxx) {
-                builder.append(maze[Position(x, y)]?:'E')
+                builder.append(maze[Position(x, y)]?:'U')
             }
             builder.append('\n')
         }
@@ -92,16 +108,18 @@ open class Maze constructor (val maze: Map<Position, Char>, val currentPositionC
     }
 
     fun isComplete(): Boolean {
-        if(maze.size <= 4)
-            return false
         val minx = maze.map { it.key.x }.min()!!
         val miny = maze.map { it.key.y }.min()!!
         val maxx = maze.map { it.key.x }.max()!!
         val maxy = maze.map { it.key.y }.max()!!
-        return maze.filter { it.key.x == minx }.none{ isFreePath(it.value) || it.value == currentPositionChar }
-            && maze.filter { it.key.y == miny }.none{ isFreePath(it.value) || it.value == currentPositionChar  }
-            && maze.filter { it.key.x == maxx }.none{ isFreePath(it.value) || it.value == currentPositionChar  }
-            && maze.filter { it.key.y == maxy }.none{ isFreePath(it.value) || it.value == currentPositionChar  }
+        if(maxx-minx < 3 ||maxy-miny < 3) {
+            return false
+        }
+        return maze.filter { it.value == 'E' }.none{isNotWrappedByWalls(it.key)}
+    }
+
+    private fun isNotWrappedByWalls(emptyCell: Position): Boolean {
+        return !getNeighbours(emptyCell).all{ maze[it] == null || maze[it] == '#'}
     }
 
 

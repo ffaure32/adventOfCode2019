@@ -10,7 +10,7 @@ fun main(args: Array<String>) {
 
 
 
-fun findOxygenSystem(input: String, queue: Queue<Long>): BigIntCodeComputer {
+fun findOxygenSystem(input: String, queue: Queue<Long>): Int {
     val inputSplit = stringToLongList(input)
 
     val droidScreen = DroidScreen()
@@ -19,5 +19,6 @@ fun findOxygenSystem(input: String, queue: Queue<Long>): BigIntCodeComputer {
     do {
         exit = intCodeComputer.applyInstructionAtPosition() || droidScreen.isMazeComplete()
     } while (!exit)
-    return intCodeComputer
+    droidScreen.maze.currentPosition = Position(0,0)
+    return droidScreen.maze.findShortestPath(droidScreen.oxygenSystem)
 }

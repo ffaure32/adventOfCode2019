@@ -14,7 +14,7 @@ fun buildTritonMaze(input: String): TritonMaze {
     return TritonMaze(maze)
 }
 
-class TritonMaze constructor (maze: Map<Position, Char>) : Maze(maze, '@') {
+class TritonMaze constructor (maze: MutableMap<Position, Char>) : Maze(maze, '@') {
 
 
     val keys = mutableMapOf<Char, Position>()
