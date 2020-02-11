@@ -48,12 +48,13 @@ fun getNeighbours(position: Position): Set<Position> {
 open class Maze constructor (val maze: MutableMap<Position, Char>, val currentPositionChar : Char) {
     val freePathChar = '.'
     val wallChar = '#'
-    var currentPosition: Position = maze.filter { it.value == currentPositionChar }.keys.first()
+
+    private fun getCurrentPosition() = maze.filter { it.value == currentPositionChar }.keys.first()
 
     fun findShortestPath(dest: Position): Int {
         val visited = mutableMapOf<Position, Boolean>()
         val q = LinkedList<QueueNode>()
-        val s = QueueNode(currentPosition, 0)
+        val s = QueueNode(getCurrentPosition(), 0)
         q.add(s)
 
         while(q.isNotEmpty()) {
@@ -122,7 +123,11 @@ open class Maze constructor (val maze: MutableMap<Position, Char>, val currentPo
         return !getNeighbours(emptyCell).all{ maze[it] == null || maze[it] == '#'}
     }
 
-
+    fun goToCenter() {
+        val previousPosition = getCurrentPosition()
+        maze[previousPosition] = freePathChar
+        maze[Position(0, 0)] = currentPositionChar
+    }
 }
 
 data class QueueNode(val position : Position, val distance : Int)

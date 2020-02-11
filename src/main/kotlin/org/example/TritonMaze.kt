@@ -23,7 +23,6 @@ class TritonMaze constructor (maze: MutableMap<Position, Char>) : Maze(maze, '@'
     init {
         keys.putAll(maze.entries.filter { it.value.isLowerCase() }.associate { (k,v)-> v to k })
         doors.putAll(maze.entries.filter { it.value.isUpperCase() }.associate { (k,v)-> v to k })
-        currentPosition = maze.filter { it.value == currentPositionChar }.keys.first()!!
     }
 
     fun findAccessibleKeys(): Set<Char> {
