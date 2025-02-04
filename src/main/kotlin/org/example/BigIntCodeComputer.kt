@@ -49,33 +49,32 @@ open class Maze constructor (val maze: MutableMap<Position, Char>, val currentPo
     val freePathChar = '.'
     val wallChar = '#'
 
-    private fun getCurrentPosition() = maze.filter { it.value == currentPositionChar }.keys.first()
+    fun getCurrentPosition() = maze.filter { it.value == currentPositionChar }.keys.first()
 
     fun findShortestPath(dest: Position): Int {
-        val visited = mutableMapOf<Position, Boolean>()
+        val visited = mutableSetOf<Position>()
         val q = LinkedList<QueueNode>()
         val s = QueueNode(getCurrentPosition(), 0)
         q.add(s)
 
         while(q.isNotEmpty()) {
-            val curr = q.peek()
-            val pos = curr.position
-            if(pos == dest) {
-                return curr.distance
+            val curr = q.remove()
+            val neighbours = getNeighbours(curr.position).filter { maze.containsKey(it) }
+            if(neighbours.contains(dest)) {
+                return curr.distance+1
             }
-            q.remove()
-            for (neighbour in getNeighbours(pos)) {
-                if ((maze[neighbour] == 'O' || isFreePath(maze[neighbour])) && visited[neighbour] == null) {
-                    visited[neighbour] = true
-                    maze[neighbour] = 'V'
+            for (neighbour in neighbours) {
+                if (isFreePath(maze[neighbour]) && !visited.contains(neighbour)) {
+                    visited.add(neighbour)
                     q.add(QueueNode(neighbour, curr.distance + 1))
                 }
             }
         }
         return -1
     }
+
     open fun isFreePath(char : Char?) : Boolean {
-        return char != null && (char == freePathChar || char == 'E')
+        return char != null && (char == freePathChar)
     }
 
     fun fillEmptyParts() {
@@ -135,9 +134,9 @@ data class QueueNode(val position : Position, val distance : Int)
 class BigIntCodeComputer(val inputs: MutableList<Long>, val input: Queue<Long>, val intCodeInteraction : IntCodeInteraction) {
     var position: Int = 0
     var relativeBase: Int = 0
-
+    var count = 0
     fun applyInstructionAtPosition() : Boolean {
-
+        count++
         val instructions = buildInstructions(inputs[position].toString())
         val inputList = InputListLong(inputs, instructions.parameterModes, position, relativeBase)
         when (instructions.operation) {

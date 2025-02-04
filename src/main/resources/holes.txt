@@ -1,0 +1,62 @@
+#|##.#
+#|...#
+#|#..#
+
+NOT C T
+OR T J
+AND D J
+
+Pour sauter, d ne doit pas être false
+soit c est false, soit a et b sont false
+
+"NOT A J",
+"NOT B T",
+"AND T J",
+"NOT B T",
+"OR T J",
+NOT C T
+OR T J
+AND D J
+
+
+
+soit c est un trou
+
+si j est à false, c'est que d est un trou ou c et d ne sont pas des trous
+
+NOT A T
+OR J T
+NOT B T
+AND T J
+AND D J
+
+A et B à FALSE
+C et D à TRUE
+
+NOT A J
+NOT B T
+AND T J
+NOT C T
+AND T J
+AND D J
+
+#####.#.##.#.####
+
+si trou à 3 mais aussi 8, ne pas sauter
+
+ne pas sauter si : not C, D, NOT F, NOT H
+bloqué :
+......@..........
+#####.#.##.#.####
+   ABCDEFGH
+
+saute pas :
+....@............
+#####.#.##.#.####
+
+saute pas :
+@............
+#..####..####
+ABCDEFGHI
+
+faut sauter si H et pas F

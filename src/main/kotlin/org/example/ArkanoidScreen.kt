@@ -47,8 +47,8 @@ class ArkanoidScreen() : IntCodeInteraction {
     }
 
     override fun specificStore(input: Queue<Long>) {
+        printScreen()
         if(input.size == 0) {
-            printScreen()
             joystickInteraction(input)
         }
     }

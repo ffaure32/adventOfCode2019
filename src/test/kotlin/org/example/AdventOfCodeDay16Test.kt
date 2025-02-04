@@ -71,7 +71,7 @@ class AdventOfCodeDay16Test {
         return result
     }
 
-    fun generatePattern(index : Int, basePattern : List<Int>, maxSize : Int) : List<Int> {
+    fun         generatePattern(index : Int, basePattern : List<Int>, maxSize : Int) : List<Int> {
         val result = mutableListOf<Int>()
         basePattern.forEach {
             for(i in 1..index) {

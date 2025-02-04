@@ -1,5 +1,7 @@
 package org.example
 
+import java.util.LinkedList
+
 fun buildTritonMaze(input: String): TritonMaze {
     val maze = mutableMapOf<Position, Char>()
     var y = 0
@@ -7,7 +9,7 @@ fun buildTritonMaze(input: String): TritonMaze {
         for (x in 0 until it.length) {
             val value = it[x]
             val position = Position(x, y)
-            maze.put(position, value)
+            if(value != '#') maze.put(position, value)
         }
         y++
     }
@@ -19,6 +21,7 @@ class TritonMaze constructor (maze: MutableMap<Position, Char>) : Maze(maze, '@'
 
     val keys = mutableMapOf<Char, Position>()
     val doors = mutableMapOf<Char, Position>()
+    val initPosition = getCurrentPosition()
 
     init {
         keys.putAll(maze.entries.filter { it.value.isLowerCase() }.associate { (k,v)-> v to k })
@@ -26,11 +29,15 @@ class TritonMaze constructor (maze: MutableMap<Position, Char>) : Maze(maze, '@'
     }
 
     fun findAccessibleKeys(): Set<Char> {
-        return maze.entries.filter{ it.value.isLowerCase() }.map { it.value }.toSet()
-        // return findAccessiblePositions().map { maze[it]!! }.filter{ it.isLowerCase() }.toSet()
+        return keys.keys
     }
+
     fun findKeyPosition(c : Char): Position {
-        return maze.entries.find { it.value == c }!!.key
+        return keys[c]!!
+    }
+
+    fun findDoorPosition(c : Char): Position? {
+        return doors[c.toUpperCase()]
     }
 
     fun hasDoor(findAccessibleKey: Char): Boolean {
@@ -40,16 +47,17 @@ class TritonMaze constructor (maze: MutableMap<Position, Char>) : Maze(maze, '@'
     fun openDoor(char : Char) : TritonMaze {
         val newMaze = maze.toMutableMap()
         val position = findKeyPosition(char)
-        newMaze[findKeyPosition(currentPositionChar)] = freePathChar
+        newMaze[initPosition] = freePathChar
         newMaze[position] = currentPositionChar
-        if(hasDoor(char)) {
-            newMaze[findKeyPosition(char.toUpperCase())] = freePathChar
+        val doorPosition = findDoorPosition(char)
+        if(doorPosition != null) {
+            newMaze[doorPosition] = freePathChar
         }
         return TritonMaze(newMaze)
     }
 
-    override fun isFreePath(char : Char?): Boolean {
+/*    override fun isFreePath(char : Char?): Boolean {
         return super.isFreePath(char) || char != null && char.isLowerCase()
-    }
+    }*/
 }
 

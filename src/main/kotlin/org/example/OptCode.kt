@@ -43,7 +43,7 @@ class IntCodeComputer(val inputs: MutableList<Int>, val input: Queue<Int>) {
         var exit: Boolean
         do {
             exit = applyInstructionAtPosition()
-        } while (!exit)
+        } while (status == Status.RUNNING)
     }
 
     fun applyInstructionAtPosition() : Boolean {
@@ -72,6 +72,7 @@ class IntCodeComputer(val inputs: MutableList<Int>, val input: Queue<Int>) {
             OptCode.OUTPUT -> {
                 val outputPosition = inputList.getOutputValue(0)
                 output.add(inputs[outputPosition])
+                println(output)
                 status = Status.WAITING
             }
             OptCode.JUMP_IF_TRUE -> {

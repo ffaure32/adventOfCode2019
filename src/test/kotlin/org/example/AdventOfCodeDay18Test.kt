@@ -85,7 +85,7 @@ class AdventOfCodeDay18Test {
     }
     val finalPathes = mutableSetOf<Long>()
     val pathCounts= mutableSetOf<Path>()
-
+    val shorterPath = mutableMapOf<ShorterPath, Long>()
     fun shortestPath(maze : TritonMaze): Long {
         val path = Path()
         computeDistance(maze, path)
@@ -99,13 +99,17 @@ class AdventOfCodeDay18Test {
             newSet.add(findAccessibleKey)
             val count = path.length
             val shortestPath = maze.findShortestPath(maze.findKeyPosition(findAccessibleKey))
+            if(shortestPath == -1) {
+                continue
+            }
             val totalPath = count + shortestPath
             val newPath =  Path(newSet, findAccessibleKey, totalPath)
-            if(pathExists(newPath)) {
+            if(pathExists(newPath) || shorterPathExists(newPath)) {
                 return
             }
             if(totalPath >= 0 && totalPath < finalPathes.min() ?: totalPath+1) {
                 pathCounts.add(newPath)
+                shorterPath[ShorterPath(newPath.chars, newPath.lastChar)] = newPath.length
                 if (findAccessibleKeys.size <= 1) {
                     finalPathes.add(totalPath)
                     println("min path:" + finalPathes.min())
@@ -120,9 +124,20 @@ class AdventOfCodeDay18Test {
     }
 
     fun pathExists(path : Path) : Boolean {
-        return pathCounts.find { it.lastChar == path.lastChar && it.length <= path.length && it.chars== path.chars } != null
+        return pathCounts.contains(path)
     }
-    class Path(val chars : Set<Char> = setOf(), val lastChar : Char = 'a', val length : Long = 0L) {
+
+    fun shorterPathExists(path : Path) : Boolean {
+        val shorterPath = shorterPath[ShorterPath(path.chars, path.lastChar)]
+        if(shorterPath != null) {
+            return shorterPath <=path.length
+        } else {
+            return false
+        }
+    }
+
+    data class ShorterPath(val chars : Set<Char> = setOf(), val lastChar : Char = 'a')
+    data class Path(val chars : Set<Char> = setOf(), val lastChar : Char = 'a', val length : Long = 0L) {
 
     }
 }

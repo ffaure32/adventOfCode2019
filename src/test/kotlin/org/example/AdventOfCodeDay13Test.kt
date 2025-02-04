@@ -20,7 +20,7 @@ class AdventOfCodeDay13Test {
         val winnerMoves = "/winnerMoves".loadFromFile()
         val inputJoystick = winnerMoves.lines()[0].trim().split(",").map { it.toLong() }
         val longQueue = initLongQueue()
-        longQueue.addAll(inputJoystick)
+        //longQueue.addAll(inputJoystick)
         assertEquals(17159, playArkanoid(input, longQueue).resultPart2() as Long)
     }
 }

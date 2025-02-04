@@ -48,20 +48,17 @@ class AdventOfCodeDay7Test {
             ampli4.applyInstructionsWithBlockingInput()
             val ampli5 = IntCodeComputer(mutableInput, initQueue(it[4], ampli4.output[0]))
             ampli5.applyInstructionsWithBlockingInput()
-            var exit : Boolean = false
+            var exit = false
             while(!exit) {
-                ampli1.applyInstructionsWithBlockingInput(ampli5.output[0])
-                exit = (ampli1.status == Status.EXIT)
-                ampli2.applyInstructionsWithBlockingInput(ampli1.output[0])
-                exit = (ampli2.status == Status.EXIT)
-                ampli3.applyInstructionsWithBlockingInput(ampli2.output[0])
-                exit = (ampli3.status == Status.EXIT)
-                ampli4.applyInstructionsWithBlockingInput(ampli3.output[0])
-                exit = (ampli4.status == Status.EXIT)
-                ampli5.applyInstructionsWithBlockingInput(ampli4.output[0])
+                ampli1.applyInstructionsWithBlockingInput(ampli5.output.last())
+                ampli2.applyInstructionsWithBlockingInput(ampli1.output.last())
+                ampli3.applyInstructionsWithBlockingInput(ampli2.output.last())
+                ampli4.applyInstructionsWithBlockingInput(ampli3.output.last())
+                ampli5.applyInstructionsWithBlockingInput(ampli4.output.last())
                 exit = (ampli5.status == Status.EXIT)
 
             }
+            println(ampli5.output)
         }
         return 12
     }

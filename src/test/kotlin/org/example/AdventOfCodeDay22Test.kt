@@ -48,6 +48,55 @@ class AdventOfCodeDay22Test {
     }
 
     @Test
+    fun revertCutTechniqueSplitsAndInvertsDeck() {
+        // ARRANGE
+        val target = 9
+
+        // ACT
+        val result = Technique.CUT_N_CARDS.previousPosition(target, 3, 10)
+
+        //
+        assertEquals(2, result)
+    }
+
+    @Test
+    fun revertCutTechniqueSplitsAndNegativeDeck() {
+        // ARRANGE
+        val target = 4
+
+        // ACT
+        val result = Technique.CUT_N_CARDS.previousPosition(target, -4, 10)
+
+        //
+        assertEquals(0, result)
+    }
+
+    @Test
+    fun revertCutTechniqueDealWithIncrementDeck() {
+        // ARRANGE
+        val deck = Deck(10)
+
+        // ACT
+        val result = Technique.DEAL_WITH_INCREMENT.previousPosition(4, 4, 10)
+
+        //
+        assertEquals(2, result)
+        /*
+        0 -> 0
+        1 -> 7
+        2 -> 4
+        3 -> 1
+        4 -> 8
+        5 -> 5
+        6 -> 2
+        7 -> 9
+        8 -> 6
+        9 -> 3
+         */
+    }
+
+
+    @Test
     fun applyCutTechniqueWithNegativeN() {
         // ARRANGE
         val deck = Deck(10)
@@ -72,6 +121,7 @@ class AdventOfCodeDay22Test {
         val expected = listOf(0, 7, 4, 1, 8, 5, 2, 9, 6, 3)
         assertEquals(expected, result.cards)
     }
+
 
     @Test
     fun functionalCase1() {
@@ -189,6 +239,10 @@ enum class Technique {
             return cards.reversed()
         }
 
+        override fun previousPosition(currentPosition: Int, cardPosition: Int, deckSize: Int): Int {
+            return deckSize-currentPosition
+        }
+
     },
     CUT_N_CARDS {
         override fun shuffle(cards: List<Int>, cardPosition: Int): List<Int> {
@@ -198,19 +252,31 @@ enum class Technique {
                 return cards.subList(cards.size+cardPosition, cards.size) + cards.subList(0, cards.size+cardPosition)
             }
         }
+
+        override fun previousPosition(currentPosition: Int, cardPosition: Int, deckSize: Int): Int {
+            return (currentPosition+cardPosition+deckSize) % deckSize
+        }
+
     },
     DEAL_WITH_INCREMENT {
         override fun shuffle(cards: List<Int>, cardPosition: Int): List<Int> {
-            val positions = (0 until cards.size).map { if (it == 0) 0 else (it * cardPosition) % cards.size }.toList()
+            val positions = cards.indices.map { if (it == 0) 0 else (it * cardPosition) % cards.size }.toList()
             val arr = IntArray(positions.size)
             for(item in positions.indices) {
                 arr[positions[item]] = cards[item]
             }
             return arr.toList()
         }
+
+        override fun previousPosition(currentPosition: Int, cardPosition: Int, deckSize: Int): Int {
+            return (deckSize/cardPosition)*(currentPosition%cardPosition)
+        }
     };
 
     abstract fun shuffle(cards: List<Int>, cardPosition:Int = 0) : List<Int>
+
+    abstract fun previousPosition(currentPosition: Int, cardPosition: Int = 0, deckSize: Int) : Int
+
 }
 
 fun initListFromRange(cardsNumber: Int) = (0 until cardsNumber).map { it }

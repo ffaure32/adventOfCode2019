@@ -1,5 +1,7 @@
 package org.example
 
+import kotlin.math.ceil
+
 class Reaction(val outputChemical: Chemical, val inputChemicals: Set<Chemical>) {
 }
 
@@ -18,6 +20,46 @@ class Reactions(val reactionSet: Set<Reaction>) {
         calculateORENeeds()
         return needs
     }
+
+    fun computeTrillionORE() : Long {
+        var oreCount = 0L
+        var fuelCount = 0L
+        val needs = mutableMapOf<String, Int>()
+        val stock = mutableMapOf<String, Int>()
+        while(oreCount < 1000000000000) {
+            val lastReaction = findReaction("FUEL")
+            lastReaction.inputChemicals.forEach { needs.put(it.chemicalLitteral, it.quantity) }
+            while(needs.any { it.key != "ORE" }) {
+                val newNeeds = mutableMapOf<String, Int>()
+                needs.filter { it.key != "ORE" }.forEach { key, neededQuantity ->
+                    val existingStock = stock.getOrDefault(key, 0)
+                    val toProduceQuantity = neededQuantity - existingStock
+                    if(toProduceQuantity<=0) {
+                        stock[key] = existingStock - neededQuantity
+                    } else {
+                        stock[key] = 0
+                        val targetReaction = findReaction(key)
+                        val producibleQuantity = targetReaction.outputChemical.quantity
+
+                        val toProduce = ceil(toProduceQuantity.toFloat()/producibleQuantity.toFloat()).toInt()
+                        val waste = toProduce * producibleQuantity - toProduceQuantity
+                        stock[key] = waste
+                        newNeeds.putAll(targetReaction.inputChemicals.map { it.chemicalLitteral to it.quantity * toProduce + newNeeds.getOrDefault(it.chemicalLitteral, 0)})
+                    }
+                }
+                needs.keys.filter { it != "ORE" }.forEach { needs.remove(it) }
+                newNeeds.forEach { (key, value) -> needs[key] = value + needs.getOrDefault(key, 0) }
+            }
+            oreCount+=needs.getOrDefault("ORE", 0)
+            needs.remove("ORE")
+            fuelCount++
+        }
+        return fuelCount
+    }
+
+
+
+
 
     private fun calculateORENeeds() {
         var exit = false
