@@ -1,8 +1,8 @@
 package org.example
 
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.jupiter.api.TestInstance
+import kotlin.math.min
 import kotlin.test.assertEquals
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -83,61 +83,59 @@ class AdventOfCodeDay18Test {
         val tritonMaze = buildTritonMaze(input)
         assertEquals(4406, shortestPath(tritonMaze))
     }
-    val finalPathes = mutableSetOf<Long>()
-    val pathCounts= mutableSetOf<Path>()
-    val shorterPath = mutableMapOf<ShorterPath, Long>()
+
+    @Test
+    fun realPart2() {
+        val input = "/day18Tetra.txt".loadFromFile()
+        val tritonMaze = buildTetraMaze(input)
+        assertEquals(1964, shortestPath(tritonMaze))
+    }
+
+    var shortestPathLength = Long.MAX_VALUE
+    val shorterPath = mutableMapOf<PathKey, Long>()
     fun shortestPath(maze : TritonMaze): Long {
         val path = Path()
-        computeDistance(maze, path)
-        return finalPathes.min() ?: 0
-
+        computeDistance(maze, maze.findAllKeys().size, path)
+        return shortestPathLength
     }
-    fun computeDistance(maze: TritonMaze, path : Path) {
-        val findAccessibleKeys = maze.findAccessibleKeys()
-        for (findAccessibleKey in findAccessibleKeys) {
-            val newSet = path.chars.toMutableSet()
-            newSet.add(findAccessibleKey)
-            val count = path.length
-            val shortestPath = maze.findShortestPath(maze.findKeyPosition(findAccessibleKey))
-            if(shortestPath == -1) {
+
+    fun computeDistance(maze: TritonMaze, totalKeyCount : Int, path : Path) {
+        val accessibleKeys = maze.findAccessibleKeys()
+        for (keyPair in accessibleKeys) {
+            val key = keyPair.first
+            val newPathLength = path.steps + keyPair.second
+            val newPath = Path(path.collectedKeys + key, key, newPathLength)
+            if (shorterPathExists(newPath)) {
                 continue
+            } else {
+                shorterPath[PathKey(newPath.collectedKeys, newPath.lastCollectedKey)] = newPathLength
             }
-            val totalPath = count + shortestPath
-            val newPath =  Path(newSet, findAccessibleKey, totalPath)
-            if(pathExists(newPath) || shorterPathExists(newPath)) {
-                return
-            }
-            if(totalPath >= 0 && totalPath < finalPathes.min() ?: totalPath+1) {
-                pathCounts.add(newPath)
-                shorterPath[ShorterPath(newPath.chars, newPath.lastChar)] = newPath.length
-                if (findAccessibleKeys.size <= 1) {
-                    finalPathes.add(totalPath)
-                    println("min path:" + finalPathes.min())
+            if (newPathLength < shortestPathLength) {
+                if (newPath.collectedKeys.size == totalKeyCount) {
+                    shortestPathLength = min(shortestPathLength, newPathLength)
+                    println("different paths " + shortestPathLength)
+
                 }
-                if (shortestPath >= 0) {
-                    val openDoor = maze.openDoor(findAccessibleKey)
-                    computeDistance(openDoor, newPath)
+                if (keyPair.second >= 0) {
+                    val openDoor = maze.openDoor(key)
+                    computeDistance(openDoor, totalKeyCount, newPath)
                 }
             }
         }
 
-    }
-
-    fun pathExists(path : Path) : Boolean {
-        return pathCounts.contains(path)
     }
 
     fun shorterPathExists(path : Path) : Boolean {
-        val shorterPath = shorterPath[ShorterPath(path.chars, path.lastChar)]
-        if(shorterPath != null) {
-            return shorterPath <=path.length
+        val shorterPath = shorterPath[PathKey(path.collectedKeys, path.lastCollectedKey)]
+        return if(shorterPath != null) {
+            shorterPath <=path.steps
         } else {
-            return false
+            false
         }
     }
 
-    data class ShorterPath(val chars : Set<Char> = setOf(), val lastChar : Char = 'a')
-    data class Path(val chars : Set<Char> = setOf(), val lastChar : Char = 'a', val length : Long = 0L) {
+    data class PathKey(val collectedKeys : Set<Char> = setOf(), val lastCollectedKey : Char)
+    data class Path(val collectedKeys : Set<Char> = setOf(), val lastCollectedKey : Char = 'a', val steps : Long = 0L) {
 
     }
 }

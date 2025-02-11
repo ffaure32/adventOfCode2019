@@ -1,9 +1,9 @@
 package org.example
 
-import org.junit.Test
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import kotlin.math.abs
-import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -49,7 +49,7 @@ class AdventOfCodeDay3Test {
     private lateinit var secondLine: Line
     private lateinit var moves : Moves
 
-    @BeforeTest
+    @BeforeEach
     fun init() {
         firstLine = Line(START, mutableListOf(START))
         secondLine = Line(START, mutableListOf(START))

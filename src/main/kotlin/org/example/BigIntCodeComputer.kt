@@ -49,12 +49,12 @@ open class Maze constructor (val maze: MutableMap<Position, Char>, val currentPo
     val freePathChar = '.'
     val wallChar = '#'
 
-    fun getCurrentPosition() = maze.filter { it.value == currentPositionChar }.keys.first()
+    open fun getCurrentPosition() = maze.filter { it.value == currentPositionChar }.keys.first()
 
     fun findShortestPath(dest: Position): Int {
         val visited = mutableSetOf<Position>()
         val q = LinkedList<QueueNode>()
-        val s = QueueNode(getCurrentPosition(), 0)
+        val s = QueueNode(getCurrentPosition(dest), 0)
         q.add(s)
 
         while(q.isNotEmpty()) {
@@ -73,15 +73,19 @@ open class Maze constructor (val maze: MutableMap<Position, Char>, val currentPo
         return -1
     }
 
+    open fun getCurrentPosition(dest: Position): Position {
+        return getCurrentPosition()
+    }
+
     open fun isFreePath(char : Char?) : Boolean {
         return char != null && (char == freePathChar)
     }
 
     fun fillEmptyParts() {
-        val minx = maze.map { it.key.x }.min()!!
-        val miny = maze.map { it.key.y }.min()!!
-        val maxx = maze.map { it.key.x }.max()!!
-        val maxy = maze.map { it.key.y }.max()!!
+        val minx = maze.map { it.key.x }.min()
+        val miny = maze.map { it.key.y }.min()
+        val maxx = maze.map { it.key.x }.max()
+        val maxy = maze.map { it.key.y }.max()
         for(y in miny .. maxy) {
             for(x in minx .. maxx) {
                 val target = Position(x, y)
@@ -94,10 +98,10 @@ open class Maze constructor (val maze: MutableMap<Position, Char>, val currentPo
 
     override fun toString(): String {
         val builder = StringBuilder()
-        val minx = maze.map { it.key.x }.min()!!
-        val miny = maze.map { it.key.y }.min()!!
-        val maxx = maze.map { it.key.x }.max()!!
-        val maxy = maze.map { it.key.y }.max()!!
+        val minx = maze.map { it.key.x }.min()
+        val miny = maze.map { it.key.y }.min()
+        val maxx = maze.map { it.key.x }.max()
+        val maxy = maze.map { it.key.y }.max()
         for(y in maxy downTo miny) {
             for(x in minx .. maxx) {
                 builder.append(maze[Position(x, y)]?:'U')
@@ -108,10 +112,10 @@ open class Maze constructor (val maze: MutableMap<Position, Char>, val currentPo
     }
 
     fun isComplete(): Boolean {
-        val minx = maze.map { it.key.x }.min()!!
-        val miny = maze.map { it.key.y }.min()!!
-        val maxx = maze.map { it.key.x }.max()!!
-        val maxy = maze.map { it.key.y }.max()!!
+        val minx = maze.map { it.key.x }.min()
+        val miny = maze.map { it.key.y }.min()
+        val maxx = maze.map { it.key.x }.max()
+        val maxy = maze.map { it.key.y }.max()
         if(maxx-minx < 3 ||maxy-miny < 3) {
             return false
         }

@@ -12,7 +12,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <kotlin.version>1.3.61</kotlin.version>
+        <kotlin.version>1.8.20</kotlin.version>
         <kotlin.code.style>official</kotlin.code.style>
         <junit.version>5.5.2</junit.version>
 
@@ -34,6 +34,18 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
             <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.lets-plot</groupId>
+            <artifactId>lets-plot-common</artifactId>
+            <version>4.3.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.lets-plot</groupId>
+            <artifactId>lets-plot-batik</artifactId>
+            <version>4.4.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

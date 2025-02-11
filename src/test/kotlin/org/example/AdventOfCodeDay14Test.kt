@@ -158,7 +158,7 @@ class AdventOfCodeDay14Test {
         val lines = "/day14.txt".loadFromFile().lines()
         val reactions = Reactions(lines.map { buildReaction(it) }.toSet())
         val result = reactions.computeTrillionORE()
-        println(result -1)
+        assertEquals(3281820, result -1)
     }
 
     @Test
@@ -173,22 +173,6 @@ class AdventOfCodeDay14Test {
             7 DCFZ, 7 PSHF => 2 XJWVT
             165 ORE => 2 GPVTF
             3 DCFZ, 7 NZVS, 5 HKGWZ, 10 PSHF => 8 KHKGT
-        """.trimIndent()
-        val inputSplitted = input.split("\n")
-        val reactions = Reactions(inputSplitted.map { buildReaction(it) }.toSet())
-        val result = reactions.computeTrillionORE()
-        println(result -1)
-    }
-    @Test
-    fun testTrillionSample1() {
-        val input = """
-9 ORE => 2 A
-8 ORE => 3 B
-7 ORE => 5 C
-3 A, 4 B => 1 AB
-5 B, 7 C => 1 BC
-4 C, 1 A => 1 CA
-2 AB, 3 BC, 4 CA => 1 FUEL
         """.trimIndent()
         val inputSplitted = input.split("\n")
         val reactions = Reactions(inputSplitted.map { buildReaction(it) }.toSet())

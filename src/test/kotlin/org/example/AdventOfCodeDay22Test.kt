@@ -1,10 +1,8 @@
-package org.example
-
-import org.junit.Test
-import org.junit.jupiter.api.TestInstance
+import org.example.loadFromFile
+import org.junit.jupiter.api.Test
+import java.math.BigInteger.*
 import kotlin.test.assertEquals
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AdventOfCodeDay22Test {
 
     @Test
@@ -50,7 +48,7 @@ class AdventOfCodeDay22Test {
     @Test
     fun revertCutTechniqueSplitsAndInvertsDeck() {
         // ARRANGE
-        val target = 9
+        val target = 9L
 
         // ACT
         val result = Technique.CUT_N_CARDS.previousPosition(target, 3, 10)
@@ -62,7 +60,7 @@ class AdventOfCodeDay22Test {
     @Test
     fun revertCutTechniqueSplitsAndNegativeDeck() {
         // ARRANGE
-        val target = 4
+        val target = 4L
 
         // ACT
         val result = Technique.CUT_N_CARDS.previousPosition(target, -4, 10)
@@ -77,22 +75,10 @@ class AdventOfCodeDay22Test {
         val deck = Deck(10)
 
         // ACT
-        val result = Technique.DEAL_WITH_INCREMENT.previousPosition(4, 4, 10)
+        val result = Technique.DEAL_WITH_INCREMENT.previousPosition(4, 3, 10)
 
         //
-        assertEquals(2, result)
-        /*
-        0 -> 0
-        1 -> 7
-        2 -> 4
-        3 -> 1
-        4 -> 8
-        5 -> 5
-        6 -> 2
-        7 -> 9
-        8 -> 6
-        9 -> 3
-         */
+        assertEquals(8, result)
     }
 
 
@@ -117,9 +103,11 @@ class AdventOfCodeDay22Test {
         // ACT
         val result = deck.applyTechnique(Technique.DEAL_WITH_INCREMENT, 3)
 
-        //
+        // ASSERT
         val expected = listOf(0, 7, 4, 1, 8, 5, 2, 9, 6, 3)
         assertEquals(expected, result.cards)
+        assertEquals(7, Technique.DEAL_WITH_INCREMENT.previousPosition(1, 3, 10))
+
     }
 
 
@@ -143,13 +131,17 @@ class AdventOfCodeDay22Test {
     fun functionalCase2() {
         // ARRANGE
         val deck = Deck(10)
+        deck.cards.forEachIndexed { index, i ->  if(i == 3) println(index)}
 
         // ACT
         val result =
             deck
                 .applyTechnique(Technique.CUT_N_CARDS, 6)
+                .also { it.cards.forEachIndexed { index, i ->  if(i == 3) println(index)} }
                 .applyTechnique(Technique.DEAL_WITH_INCREMENT, 7)
+                .also { it.cards.forEachIndexed { index, i ->  if(i == 3) println(index)} }
                 .applyTechnique(Technique.DEAL_INTO_NEW_STACK)
+                .also { it.cards.forEachIndexed { index, i ->  if(i == 3) println(index)} }
 
         //
         val expected = listOf(3, 0, 7, 4, 1, 8, 5, 2, 9, 6)
@@ -157,21 +149,57 @@ class AdventOfCodeDay22Test {
     }
 
     @Test
+    fun revertFunctionalCase2() {
+        // ARRANGE
+        var currentPosition = 0L
+        println(currentPosition)
+
+        // ACT
+        currentPosition = Technique.DEAL_INTO_NEW_STACK.previousPosition(currentPosition, 0, 10)
+        println(currentPosition)
+        currentPosition = Technique.DEAL_WITH_INCREMENT.previousPosition(currentPosition, 7, 10)
+        println(currentPosition)
+        currentPosition = Technique.CUT_N_CARDS.previousPosition(currentPosition, 6, 10)
+        println(currentPosition)
+    }
+
+    @Test
     fun functionalCase3() {
         // ARRANGE
         val deck = Deck(10)
+        deck.cards.forEachIndexed { index, i ->  if(i == 3) println(index)}
 
         // ACT
         val result =
             deck
                 .applyTechnique(Technique.DEAL_WITH_INCREMENT, 7)
+                .also { it.cards.forEachIndexed { index, i ->  if(i == 3) println(index)} }
                 .applyTechnique(Technique.DEAL_WITH_INCREMENT, 9)
+                .also { it.cards.forEachIndexed { index, i ->  if(i == 3) println(index)} }
                 .applyTechnique(Technique.CUT_N_CARDS, -2)
+                .also { it.cards.forEachIndexed { index, i ->  if(i == 3) println(index)} }
 
         //
         val expected = listOf(6, 3, 0, 7, 4, 1, 8, 5, 2, 9)
         assertEquals(expected, result.cards)
     }
+    @Test
+    fun revertFunctionalCase3() {
+        // ARRANGE
+        var currentPosition = 1L
+        println(currentPosition)
+        // ACT
+        currentPosition = Technique.CUT_N_CARDS.previousPosition(currentPosition, -2, 10)
+        println(currentPosition)
+        currentPosition = Technique.DEAL_WITH_INCREMENT.previousPosition(currentPosition, 9, 10)
+        println(currentPosition)
+        currentPosition = Technique.DEAL_WITH_INCREMENT.previousPosition(currentPosition, 7, 10)
+        println(currentPosition)
+
+        //
+        assertEquals(3, currentPosition)
+    }
+
 
     @Test
     fun functionalCase4() {
@@ -179,24 +207,65 @@ class AdventOfCodeDay22Test {
         val deck = Deck(10)
 
         // ACT
+        deck.cards.forEachIndexed { index, i ->  if(i == 3) println(index)}
         val result =
             deck
                 .applyTechnique(Technique.DEAL_INTO_NEW_STACK)
+                .also { it.cards.forEachIndexed { index, i ->  if(i == 3) println(index)} }
                 .applyTechnique(Technique.CUT_N_CARDS, -2)
+                .also { it.cards.forEachIndexed { index, i ->  if(i == 3) println(index)} }
                 .applyTechnique(Technique.DEAL_WITH_INCREMENT, 7)
+                .also { it.cards.forEachIndexed { index, i ->  if(i == 3) println(index)} }
                 .applyTechnique(Technique.CUT_N_CARDS, 8)
+                .also { it.cards.forEachIndexed { index, i ->  if(i == 3) println(index)} }
                 .applyTechnique(Technique.CUT_N_CARDS, -4)
+                .also { it.cards.forEachIndexed { index, i ->  if(i == 3) println(index)} }
                 .applyTechnique(Technique.DEAL_WITH_INCREMENT, 7)
+                .also { it.cards.forEachIndexed { index, i ->  if(i == 3) println(index)} }
                 .applyTechnique(Technique.CUT_N_CARDS, 3)
+                .also { it.cards.forEachIndexed { index, i ->  if(i == 3) println(index)} }
                 .applyTechnique(Technique.DEAL_WITH_INCREMENT, 9)
+                .also { it.cards.forEachIndexed { index, i ->  if(i == 3) println(index)} }
                 .applyTechnique(Technique.DEAL_WITH_INCREMENT, 3)
+                .also { it.cards.forEachIndexed { index, i ->  if(i == 3) println(index)} }
                 .applyTechnique(Technique.CUT_N_CARDS, -1)
+                .also { it.cards.forEachIndexed { index, i ->  if(i == 3) println(index)} }
 
         //
         val expected = listOf(9, 2, 5, 8, 1, 4, 7, 0, 3, 6)
         assertEquals(expected, result.cards)
     }
 
+    @Test
+    fun revertFunctionalCase4() {
+        // ARRANGE
+        val deck = Deck(10)
+        var currentPosition = 8L
+        println(currentPosition)
+        // ACT
+        currentPosition = Technique.CUT_N_CARDS.previousPosition(currentPosition, -1, 10)
+        println(currentPosition)
+        currentPosition = Technique.DEAL_WITH_INCREMENT.previousPosition(currentPosition, 3, 10)
+        println(currentPosition)
+        currentPosition = Technique.DEAL_WITH_INCREMENT.previousPosition(currentPosition, 9, 10)
+        println(currentPosition)
+        currentPosition = Technique.CUT_N_CARDS.previousPosition(currentPosition, 3, 10)
+        println(currentPosition)
+        currentPosition = Technique.DEAL_WITH_INCREMENT.previousPosition(currentPosition, 7, 10)
+        println(currentPosition)
+        currentPosition = Technique.CUT_N_CARDS.previousPosition(currentPosition, -4, 10)
+        println(currentPosition)
+        currentPosition = Technique.CUT_N_CARDS.previousPosition(currentPosition, 8, 10)
+        println(currentPosition)
+        currentPosition = Technique.DEAL_WITH_INCREMENT.previousPosition(currentPosition, 7, 10)
+        println(currentPosition)
+        currentPosition = Technique.CUT_N_CARDS.previousPosition(currentPosition, -2, 10)
+        println(currentPosition)
+        currentPosition = Technique.DEAL_INTO_NEW_STACK.previousPosition(currentPosition, 0, 10)
+        println(currentPosition)
+        //
+        assertEquals(3, currentPosition)
+    }
     @Test
     fun real() {
         val input = "/day22.txt".loadFromFile().lines()
@@ -211,9 +280,65 @@ class AdventOfCodeDay22Test {
                 deck = deck.applyTechnique(Technique.DEAL_INTO_NEW_STACK)
             }
         }
+        println(deck.cards[2019])
         assertEquals(6696, deck.cards.indexOf(2019))
     }
 
+    @Test
+    fun revertReal() {
+        val input = "/day22.txt".loadFromFile().lines()
+        var deckSize = 10007L
+        var currentPosition = 6696L
+        // currentPosition = revertRealInput(currentPosition, deckSize)
+        for(instruction in buildInstructions(input.reversed())) {
+            currentPosition = instruction.first.previousPosition(currentPosition, instruction.second, deckSize)
+        }
+        assertEquals(2019, currentPosition)
+    }
+
+    fun buildInstructions(input : List<String>) : List<Pair<Technique, Int>> {
+        return input.map { line ->
+            val technique = line.split(" ")
+            if(technique[0] == "cut") {
+                Pair(Technique.CUT_N_CARDS, technique.last().toInt())
+            } else if(technique[1] == "with") {
+                Pair(Technique.DEAL_WITH_INCREMENT, technique.last().toInt())
+            } else {
+                Pair(Technique.DEAL_INTO_NEW_STACK, 0)
+            }
+
+        }
+    }
+
+    @Test
+    fun revertRealPart2() {
+        val input = "/day22.txt".loadFromFile().lines()
+        val deckSize = valueOf(119315717514047)
+        val step = valueOf(101741582076661)
+        var currentPosition = 2020L
+        val instructions = buildInstructions(input.reversed())
+        val firstValues = IntRange(1, 3).map {
+            for (instruction in instructions) {
+                currentPosition = instruction.first.previousPosition(currentPosition, instruction.second, deckSize.toLong())
+            }
+            currentPosition
+        }
+
+        val v1 = valueOf(firstValues[0])
+        val v2 = valueOf(firstValues[1])
+        val v3 = valueOf(firstValues[2])
+
+        // v2 = (a*v1 + b)  % nb_cards
+        // v3 = (a*v2 +b) % nb_cards
+        // a = (v3-v2)*pow(v2-v1, -1, nb_cards)
+        val a = ((v3-v2)*((v2-v1).modInverse(deckSize))).mod(deckSize)
+        val b = (v2 - a*v1).mod(deckSize)
+
+        // vn = a^(n-1)*v1+b*(1-a^(n-1))/(1-a)
+        val result = (a.modPow(step - ONE, deckSize) * v1 + b * (ONE - a.modPow(step-ONE, deckSize)) * (ONE-a).modInverse(deckSize)).mod(deckSize)
+
+        assertEquals(93750418158025, result.toLong())
+    }
 
 }
 
@@ -239,8 +364,8 @@ enum class Technique {
             return cards.reversed()
         }
 
-        override fun previousPosition(currentPosition: Int, cardPosition: Int, deckSize: Int): Int {
-            return deckSize-currentPosition
+        override fun previousPosition(currentPosition: Long, cardPosition: Int, deckSize: Long): Long {
+            return deckSize-currentPosition-1
         }
 
     },
@@ -253,7 +378,7 @@ enum class Technique {
             }
         }
 
-        override fun previousPosition(currentPosition: Int, cardPosition: Int, deckSize: Int): Int {
+        override fun previousPosition(currentPosition: Long, cardPosition: Int, deckSize: Long): Long {
             return (currentPosition+cardPosition+deckSize) % deckSize
         }
 
@@ -268,15 +393,17 @@ enum class Technique {
             return arr.toList()
         }
 
-        override fun previousPosition(currentPosition: Int, cardPosition: Int, deckSize: Int): Int {
-            return (deckSize/cardPosition)*(currentPosition%cardPosition)
+        override fun previousPosition(currentPosition: Long, cardPosition: Int, deckSize: Long): Long {
+            val modInverse =
+                valueOf(cardPosition.toLong()).modInverse(valueOf(deckSize))
+            return (valueOf(currentPosition) * valueOf(modInverse.toLong())).mod(valueOf(deckSize)).toLong()
         }
     };
 
     abstract fun shuffle(cards: List<Int>, cardPosition:Int = 0) : List<Int>
 
-    abstract fun previousPosition(currentPosition: Int, cardPosition: Int = 0, deckSize: Int) : Int
+    abstract fun previousPosition(currentPosition: Long, cardPosition: Int = 0, deckSize: Long) : Long
 
 }
 
-fun initListFromRange(cardsNumber: Int) = (0 until cardsNumber).map { it }
+fun initListFromRange(cardsNumber: Int) = IntRange(0, cardsNumber-1).map { it }
